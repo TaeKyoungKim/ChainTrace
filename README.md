@@ -35,6 +35,10 @@
    - `GET /api/batch/:id`: 단일 배치 상세 및 실시간 보관자
    - `GET /api/trace/genealogy/:id`: DuckDB 계보 재귀 추적 API
 
+5. **🌐 회사별 독립 웹 무역원장 포탈 & 결함 시나리오 처리 (Step-by-Step Portals)**
+   - **Step 1 [원료 공급사 포탈]** ([`public/supplier_portal.html`](file:///c:/apps/ChainTrace/public/supplier_portal.html)): 1차 원료 생산 수급 등록, 온체인 서명 수록 및 디지털 무역원장 전자증명서 카드 실시간 발급
+   - **Step 2 [제조사 포탈]** ([`public/manufacturer_portal.html`](file:///c:/apps/ChainTrace/public/manufacturer_portal.html)): 상위 원료 계보(Genealogy) 연결 완제품 생산, **🚨 리콜/격리 원료 투입 사전 차단 (`400 Bad Request`)**, **🚨 자사 완제품 온체인 자발적 리콜 발령**
+
 ---
 
 ## 🏗️ 시스템 아키텍처 (System Architecture)
@@ -67,32 +71,34 @@ npm install
 ### 2. 60개 사설 계정 및 잔액 확인 (계정당 100,000 ETH)
 ```bash
 node scripts/check_accounts.js
-# 또는 npm run check-accounts
 ```
 
 ### 3. 스마트 컨트랙트 엔드투엔드 시뮬레이션 실행
 ```bash
 node scripts/run_simulation.js
-# 또는 npm run simulate
 ```
 
-### 4. 14일치 308개 대량 온체인 데이터셋 생성
+### 4. Step 1 & Step 2 포탈 통합 검증 테스트
+```bash
+# Step 1: 원료 공급사 웹 포탈 검증
+node scripts/test_supplier_portal.js
+
+# Step 2: 제조사 웹 포탈 & 결함 시나리오 차단 검증
+node scripts/test_manufacturer_portal.js
+```
+
+### 5. 14일치 308개 대량 온체인 데이터셋 생성 및 조회
 ```bash
 node scripts/generate_dataset.js
-# 또는 npm run generate-data
-```
-
-### 5. 온체인 데이터 및 계보 재귀 추적 실시간 조회
-```bash
 node scripts/query_onchain_data.js
-# 또는 npm run query
 ```
 
-### 6. DuckDB 백엔드 Express REST API 서버 구동 (포트 5000)
+### 6. Express REST API 백엔드 서버 & 웹 포탈 구동 (포트 5000)
 ```bash
 node server/index.js
-# 또는 npm run start-server
 ```
+- **원료 공급사 웹 포탈 접속**: `http://localhost:5000/supplier_portal.html`
+- **제조사 웹 포탈 접속**: `http://localhost:5000/manufacturer_portal.html`
 
 ---
 
@@ -103,18 +109,24 @@ ChainTrace/
 ├── contracts/
 │   ├── ChainTraceRegistry.sol       # 스마트 컨트랙트 1 (참여자 & 배치 계보)
 │   └── ChainTraceOperations.sol     # 스마트 컨트랙트 2 (이관, 검사, 리콜)
+├── public/
+│   ├── supplier_portal.html         # Step 1: 원료 공급사 웹 포탈
+│   └── manufacturer_portal.html     # Step 2: 제조사 웹 포탈 (리콜 차단)
 ├── server/
 │   ├── index.js                     # Express REST API 서버 엔트리
 │   ├── db.js                        # DuckDB 데이터베이스 스키마 & 연결
 │   ├── indexer.js                   # 온체인 이벤트 DuckDB 고속 인덱서
 │   └── routes/
-│       └── api.js                   # REST API 라우터 (CTE 계보 추적)
+│       ├── api.js                   # REST API 라우터 (CTE 계보 추적)
+│       ├── supplier.js              # Step 1: 원료사 백엔드 API 라우터
+│       └── manufacturer.js          # Step 2: 제조사 백엔드 API 라우터
 ├── scripts/
 │   ├── check_accounts.js            # 60개 계정 잔액 검증 스크립트
 │   ├── run_simulation.js            # 컨트랙트 시뮬레이션 스크립트
 │   ├── generate_dataset.js          # 14일치 308개 배치 데이터셋 생성기
 │   ├── query_onchain_data.js        # 실시간 온체인 데이터 조회기
-│   └── test_phase2.js               # Phase 2 검증 스크립트
+│   ├── test_supplier_portal.js      # Step 1 원료사 독립 검증 스크립트
+│   └── test_manufacturer_portal.js  # Step 2 제조사 & 결함 차단 독립 검증
 ├── data/
 │   ├── supply_chain_dataset_summary.md  # AI 검증용 정답지 문서
 │   └── supply_chain_dataset_summary.json
@@ -135,4 +147,6 @@ ChainTrace/
 - 📄 [스마트 컨트랙트 상세 명세서 (`ChainTrace_SmartContracts_Spec.md`)](file:///c:/apps/ChainTrace/ChainTrace_SmartContracts_Spec.md)
 - 📄 [Phase 1 완료 보고서 (`Phase1_Completion_Report.md`)](file:///c:/apps/ChainTrace/Phase1_Completion_Report.md)
 - 📄 [Phase 2 완료 보고서 (`Phase2_Completion_Report.md`)](file:///c:/apps/ChainTrace/Phase2_Completion_Report.md)
+- 📄 [Step 1 원료사 포탈 완료 보고서 (`Step1_Supplier_Portal_Report.md`)](file:///c:/apps/ChainTrace/Step1_Supplier_Portal_Report.md)
+- 📄 [Step 2 제조사 포탈 완료 보고서 (`Step2_Manufacturer_Portal_Report.md`)](file:///c:/apps/ChainTrace/Step2_Manufacturer_Portal_Report.md)
 - 📄 [14일치 데이터셋 요약 정답지 (`data/supply_chain_dataset_summary.md`)](file:///c:/apps/ChainTrace/data/supply_chain_dataset_summary.md)
