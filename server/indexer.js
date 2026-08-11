@@ -8,6 +8,16 @@ const path = require("path");
  * DuckDB 온체인 이력 데이터 고속 인덱싱 모듈
  */
 async function indexOnChainData() {
+  // 안전한 테이블 재생성을 위한 DROP & INIT
+  await execSql(`
+    DROP TABLE IF EXISTS genealogy;
+    DROP TABLE IF EXISTS inspections;
+    DROP TABLE IF EXISTS transfers;
+    DROP TABLE IF EXISTS recalls;
+    DROP TABLE IF EXISTS batches;
+    DROP TABLE IF EXISTS participants;
+  `);
+
   await initSchema();
 
   console.log("--------------------------------------------------------------------------");
@@ -35,16 +45,6 @@ async function indexOnChainData() {
     operationsAddr = result.operationsAddr;
   }
 
-  // 테이블 기존 데이터 초기화
-  await execSql(`
-    DELETE FROM genealogy;
-    DELETE FROM inspections;
-    DELETE FROM transfers;
-    DELETE FROM recalls;
-    DELETE FROM batches;
-    DELETE FROM participants;
-  `);
-
   const registry = await ethers.getContractAt("ChainTraceRegistry", registryAddr);
   const operations = await ethers.getContractAt("ChainTraceOperations", operationsAddr);
 
@@ -71,7 +71,7 @@ async function indexOnChainData() {
           break;
         }
       }
-      const regTime = new Date(Number(info[3]) * 1000).toISOString(); // info[3] = registeredAt
+      const regTime = new Date(Number(info[3]) * 1000).toISOString();
       await runQuery(
         `INSERT INTO participants VALUES (?, ?, ?, ?, ?)`,
         [String(addr), String(roleStr), String(info[0]), Boolean(info[2]), String(regTime)]
@@ -85,7 +85,6 @@ async function indexOnChainData() {
 
   for (const bId of allBatchIds) {
     const b = await registry.getBatch(bId);
-    // b[0]: batchId, b[1]: batchType, b[2]: creator, b[3]: productName, b[4]: quantity, b[5]: unit, b[6]: createdAt, b[7]: parentBatchIds, b[8]: metadataHash
     const batchIdStr = String(b[0]);
     const bTypeStr = b[1] === 0n ? "RAW_MATERIAL" : "MANUFACTURED";
     const creatorAddr = String(b[2]);
@@ -109,7 +108,6 @@ async function indexOnChainData() {
     // 검사 성적서 인덱싱
     const inspectRecords = await operations.getInspectionRecords(bId);
     for (const r of inspectRecords) {
-      // r[0]: inspector, r[1]: isPassed, r[2]: certHash, r[3]: testDetails, r[4]: timestamp
       const inspectTime = new Date(Number(r[4]) * 1000).toISOString();
       await runQuery(
         `INSERT INTO inspections VALUES (?, ?, ?, ?, ?, ?)`,

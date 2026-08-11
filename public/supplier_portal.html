@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChainTrace - 원료 공급사 무역원장 웹 포탈</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0e17;
+      --card-bg: #131b2e;
+      --accent-cyan: #00f2fe;
+      --accent-green: #00e676;
+      --text-main: #f0f4f8;
+      --text-muted: #8a99ad;
+      --border-color: #1e2d4a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; }
+    body { background-color: var(--bg-dark); color: var(--text-main); padding: 2rem; }
+
+    .header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); margin-bottom: 2rem;
+    }
+    .header h1 { font-size: 1.8rem; font-weight: 700; color: var(--accent-cyan); display: flex; align-items: center; gap: 0.5rem; }
+    .header .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.3rem; }
+
+    .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+    @media (max-width: 1024px) { .grid-layout { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card-bg); border: 1px solid var(--border-color);
+      border-radius: 12px; padding: 1.5rem; box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+    .card-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.5rem; color: #fff; }
+
+    .form-group { margin-bottom: 1.2rem; }
+    .form-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; }
+    .form-control {
+      width: 100%; padding: 0.75rem 1rem; background: #080c14; border: 1px solid var(--border-color);
+      border-radius: 8px; color: var(--text-main); font-size: 0.95rem; outline: none; transition: border 0.2s;
+    }
+    .form-control:focus { border-color: var(--accent-cyan); }
+
+    .btn-submit {
+      width: 100%; padding: 0.9rem; background: linear-gradient(135deg, #00c6ff, #0072ff);
+      border: none; border-radius: 8px; color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 198, 255, 0.4); transition: transform 0.1s, box-shadow 0.2s;
+    }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 198, 255, 0.6); }
+
+    .cert-card {
+      background: linear-gradient(135deg, #101c33, #0a1324); border: 1px solid var(--accent-cyan);
+      border-radius: 12px; padding: 1.5rem; margin-top: 1.5rem; display: none;
+    }
+    .cert-card.active { display: block; animation: fadeIn 0.4s ease-out; }
+    .cert-badge {
+      display: inline-block; padding: 0.25rem 0.6rem; background: rgba(0, 230, 118, 0.15);
+      color: var(--accent-green); border: 1px solid var(--accent-green); border-radius: 4px;
+      font-size: 0.75rem; font-weight: 600; margin-bottom: 1rem;
+    }
+    .cert-row { display: flex; justify-content: space-between; margin-bottom: 0.6rem; font-size: 0.9rem; }
+    .cert-row .label { color: var(--text-muted); }
+    .cert-row .val { font-weight: 600; text-align: right; word-break: break-all; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.85rem; }
+    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+    th { color: var(--text-muted); background: #080c14; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div>
+      <h1>🌿 ChainTrace 원료 공급사 무역원장 포탈</h1>
+      <div class="subtitle">1차 원료 생산 수급 기록 및 블록체인 온체인 전자서명 무역원장 발급</div>
+    </div>
+    <div>
+      <label style="font-size:0.8rem; color:var(--text-muted);">접속 원료사 선택:</label>
+      <select id="supplierSelect" class="form-control" style="width:250px; margin-top:0.3rem;" onchange="loadSupplierBatches()">
+        <option value="0x70997970C51812dc3A010C7d01b50e0d17dc79C8">금산유기농원료(주)</option>
+        <option value="0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC">풍기인삼농업협동조합</option>
+        <option value="0x90F79bf6EB2c4f870365E785982E1f101E93b906">지리산약초생산조합</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="grid-layout">
+    <!-- 왼쪽: 원료 등록 폼 -->
+    <div class="card">
+      <div class="card-title">📝 원료 무역원장 신규 작성</div>
+      <form id="rawMaterialForm" onsubmit="handleFormSubmit(event)">
+        <div class="form-group">
+          <label>원료 배치 ID (Batch ID)</label>
+          <div style="display:flex; gap:0.5rem;">
+            <input type="text" id="batchId" class="form-control" placeholder="RAW-SUP01-20260811-001" required>
+            <button type="button" class="form-control" style="width:auto; cursor:pointer;" onclick="generateAutoBatchId()">⚡ 자동생성</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>원료 품목명 (Product Name)</label>
+          <input type="text" id="productName" class="form-control" value="6년근 금산 유기농 청정 수삼" required>
+        </div>
+
+        <div style="display:flex; gap:1rem;">
+          <div class="form-group" style="flex:1;">
+            <label>수량 (Quantity)</label>
+            <input type="number" id="quantity" class="form-control" value="1200" required>
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label>단위 (Unit)</label>
+            <input type="text" id="unit" class="form-control" value="kg" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>생산지 / 원산지 위치 (Origin Location)</label>
+          <input type="text" id="originLocation" class="form-control" value="충남 금산군 제원면 유기농 인삼농장" required>
+        </div>
+
+        <div class="form-group">
+          <label>품질 메타데이터 해시 (Metadata Hash / IPFS)</label>
+          <input type="text" id="metadataHash" class="form-control" value="ipfs://QmRawGinsengCert_20260811" required>
+        </div>
+
+        <button type="submit" class="btn-submit" id="btnSubmit">🖊️ 블록체인 무역원장 전자서명 및 수록</button>
+      </form>
+
+      <!-- 발행된 전자무역원장 증명서 카드 -->
+      <div id="certCard" class="cert-card">
+        <div class="cert-badge">CONFIRMED ON CHAIN</div>
+        <h3 style="font-size:1.1rem; color:var(--accent-cyan); margin-bottom:1rem;">📜 원료 무역원장 전자증명서</h3>
+        <div class="cert-row"><span class="label">배치 ID:</span><span class="val" id="certBatchId"></span></div>
+        <div class="cert-row"><span class="label">원료 품목:</span><span class="val" id="certProduct"></span></div>
+        <div class="cert-row"><span class="label">생산 수량:</span><span class="val" id="certQty"></span></div>
+        <div class="cert-row"><span class="label">생산지:</span><span class="val" id="certOrigin"></span></div>
+        <div class="cert-row"><span class="label">서명 원료사:</span><span class="val" id="certSupplier" style="font-size:0.75rem;"></span></div>
+        <div class="cert-row"><span class="label">블록 번호:</span><span class="val" id="certBlock"></span></div>
+        <div class="cert-row"><span class="label">트랜잭션 해시:</span><span class="val" id="certTxHash" style="font-size:0.7rem; color:var(--accent-cyan);"></span></div>
+      </div>
+    </div>
+
+    <!-- 오른쪽: 이전 수록된 원료 배치 목록 -->
+    <div class="card">
+      <div class="card-title">📦 온체인 수록 원료 이력 목록 (DuckDB 인덱스)</div>
+      <table>
+        <thead>
+          <tr>
+            <th>배치 ID</th>
+            <th>품목명</th>
+            <th>수량</th>
+            <th>등록일시</th>
+          </tr>
+        </thead>
+        <tbody id="batchesTableBody">
+          <tr><td colspan="4" style="color:var(--text-muted); text-align:center;">로딩 중...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    function generateAutoBatchId() {
+      const rand = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      document.getElementById('batchId').value = `RAW-SUP01-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${rand}`;
+    }
+
+    async function loadSupplierBatches() {
+      const supplierAddr = document.getElementById('supplierSelect').value;
+      const res = await fetch(`/api/supplier/batches/${supplierAddr}`);
+      const data = await res.json();
+      
+      const tbody = document.getElementById('batchesTableBody');
+      if (data.success && data.batches.length > 0) {
+        tbody.innerHTML = data.batches.map(b => `
+          <tr>
+            <td style="font-weight:600; color:var(--accent-cyan);">${b.batch_id}</td>
+            <td>${b.product_name}</td>
+            <td>${b.quantity} ${b.unit}</td>
+            <td>${new Date(b.created_at).toLocaleDateString()}</td>
+          </tr>
+        `).join('');
+      } else {
+        tbody.innerHTML = '<tr><td colspan="4" style="color:var(--text-muted); text-align:center;">등록된 배치가 없습니다.</td></tr>';
+      }
+    }
+
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSubmit');
+      btn.innerText = "⏳ 온체인 서명 및 트랜잭션 기록 중...";
+      btn.disabled = true;
+
+      const payload = {
+        supplierAddress: document.getElementById('supplierSelect').value,
+        batchId: document.getElementById('batchId').value,
+        productName: document.getElementById('productName').value,
+        quantity: document.getElementById('quantity').value,
+        unit: document.getElementById('unit').value,
+        originLocation: document.getElementById('originLocation').value,
+        metadataHash: document.getElementById('metadataHash').value
+      };
+
+      try {
+        const res = await fetch('/api/supplier/create-batch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          const c = data.certificate;
+          document.getElementById('certBatchId').innerText = c.batchId;
+          document.getElementById('certProduct').innerText = c.productName;
+          document.getElementById('certQty').innerText = c.quantity;
+          document.getElementById('certOrigin').innerText = c.originLocation;
+          document.getElementById('certSupplier').innerText = c.supplierAddress;
+          document.getElementById('certBlock').innerText = `#${c.blockNumber}`;
+          document.getElementById('certTxHash').innerText = c.transactionHash;
+          document.getElementById('certCard').classList.add('active');
+
+          loadSupplierBatches();
+        } else {
+          alert('등록 실패: ' + data.message);
+        }
+      } catch (err) {
+        alert('오류 발생: ' + err.message);
+      } finally {
+        btn.innerText = "🖊️ 블록체인 무역원장 전자서명 및 수록";
+        btn.disabled = false;
+      }
+    }
+
+    window.onload = () => {
+      generateAutoBatchId();
+      loadSupplierBatches();
+    };
+  </script>
+</body>
+</html>

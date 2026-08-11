@@ -3,15 +3,20 @@ const cors = require("cors");
 const path = require("path");
 const { indexOnChainData } = require("./indexer");
 const apiRouter = require("./routes/api");
+const supplierRouter = require("./routes/supplier");
+const manufacturerRouter = require("./routes/manufacturer");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, "..", "public")));
 
 // API 라우터 등록
 app.use("/api", apiRouter);
+app.use("/api/supplier", supplierRouter);
+app.use("/api/manufacturer", manufacturerRouter);
 
 // 기본 헬스 체크
 app.get("/", (req, res) => {

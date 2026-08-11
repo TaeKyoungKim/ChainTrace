@@ -8,25 +8,25 @@ if (!fs.existsSync(dataDir)) {
 }
 
 const dbPath = path.join(dataDir, "chaintrace.duckdb");
-const db = new duckdb.Database(dbPath);
-const conn = db.connect();
+let db;
+try {
+  db = new duckdb.Database(dbPath);
+} catch (e) {
+  console.log("⚠️ DuckDB 파일 세션 대체: 인메모리 모드로 초기화합니다.");
+  db = new duckdb.Database(":memory:");
+}
 
-// Promise 래퍼 함수 (Prepared Statement 사용)
 function runQuery(sql, params = []) {
   return new Promise((resolve, reject) => {
     if (!params || params.length === 0) {
-      conn.all(sql, (err, rows) => {
+      db.all(sql, (err, rows) => {
         if (err) return reject(err);
         resolve(rows);
       });
     } else {
-      const stmt = conn.prepare(sql, (err) => {
+      db.all(sql, ...params, (err, rows) => {
         if (err) return reject(err);
-        stmt.all(...params, (err2, rows) => {
-          stmt.finalize();
-          if (err2) return reject(err2);
-          resolve(rows);
-        });
+        resolve(rows);
       });
     }
   });
@@ -34,7 +34,7 @@ function runQuery(sql, params = []) {
 
 function execSql(sql) {
   return new Promise((resolve, reject) => {
-    conn.exec(sql, (err) => {
+    db.exec(sql, (err) => {
       if (err) return reject(err);
       resolve();
     });
@@ -103,7 +103,6 @@ async function initSchema() {
 
 module.exports = {
   db,
-  conn,
   runQuery,
   execSql,
   initSchema
