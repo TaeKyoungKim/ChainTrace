@@ -1,0 +1,30 @@
+{
+  "name": "chaintrace",
+  "version": "1.0.0",
+  "description": "Blockchain Supply Chain Traceability with DuckDB Indexer & LangGraph AI Agent",
+  "main": "index.js",
+  "scripts": {
+    "node": "hardhat node",
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "simulate": "node scripts/run_simulation.js",
+    "generate-data": "node scripts/generate_dataset.js",
+    "query": "node scripts/query_onchain_data.js",
+    "query-localhost": "node scripts/query_onchain_data.js --network localhost",
+    "check-accounts": "node scripts/check_accounts.js",
+    "start-server": "node server/index.js",
+    "test-phase2": "node scripts/test_phase2.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.2"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.2",
+    "cors": "^2.8.5",
+    "duckdb": "^1.1.3",
+    "express": "^4.19.2"
+  }
+}
