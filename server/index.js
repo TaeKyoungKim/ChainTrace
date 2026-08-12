@@ -5,6 +5,9 @@ const { indexOnChainData } = require("./indexer");
 const apiRouter = require("./routes/api");
 const supplierRouter = require("./routes/supplier");
 const manufacturerRouter = require("./routes/manufacturer");
+const inspectorRouter = require("./routes/inspector");
+const logisticsRouter = require("./routes/logistics");
+const distributorRouter = require("./routes/distributor");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -17,6 +20,9 @@ app.use(express.static(path.join(__dirname, "..", "public")));
 app.use("/api", apiRouter);
 app.use("/api/supplier", supplierRouter);
 app.use("/api/manufacturer", manufacturerRouter);
+app.use("/api/inspector", inspectorRouter);
+app.use("/api/logistics", logisticsRouter);
+app.use("/api/distributor", distributorRouter);
 
 // 기본 헬스 체크
 app.get("/", (req, res) => {

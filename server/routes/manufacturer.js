@@ -83,6 +83,16 @@ router.post("/create-batch", async (req, res) => {
     const signers = await ethers.getSigners();
     const mfgSigner = signers.find(s => s.address.toLowerCase() === manufacturerAddress.toLowerCase()) || signers[11];
 
+    // 🔒 권한 자동 부여 및 확인 (AccessControl Missing Role 에러 원천 방지)
+    const mfgRole = await registry.MANUFACTURER_ROLE();
+    const hasRole = await registry.hasRole(mfgRole, mfgSigner.address);
+    if (!hasRole) {
+      console.log(`🔑 [권한 자동 부여] ${mfgSigner.address} 계정에 MANUFACTURER_ROLE 부여 중...`);
+      const adminSigner = signers[0];
+      const grantTx = await registry.connect(adminSigner).grantRole(mfgRole, mfgSigner.address);
+      await grantTx.wait();
+    }
+
     console.log(`📝 [제조사 완제품 무역원장 등록] 제조사: ${mfgSigner.address} | 완제품: ${batchId} | 원료: ${parentBatchIds.join(", ")}`);
 
     // 스마트 컨트랙트 createManufacturedBatch 호출

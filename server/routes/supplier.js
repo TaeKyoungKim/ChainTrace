@@ -6,6 +6,18 @@ const { runQuery } = require("../db");
 const fs = require("fs");
 const path = require("path");
 
+// 등록된 원료 공급사 목록 API (GET /api/supplier/suppliers)
+router.get("/suppliers", async (req, res) => {
+  try {
+    const suppliers = await runQuery(
+      `SELECT address, company_name FROM participants WHERE role = 'SUPPLIER' ORDER BY company_name ASC`
+    );
+    res.json({ success: true, count: suppliers.length, suppliers });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // 원료 공급사 전용 무역원장 등록 API (POST /api/supplier/create-batch)
 router.post("/create-batch", async (req, res) => {
   try {
@@ -27,6 +39,16 @@ router.post("/create-batch", async (req, res) => {
     // 지갑 서명자 가져오기
     const signers = await ethers.getSigners();
     const supplierSigner = signers.find(s => s.address.toLowerCase() === supplierAddress.toLowerCase()) || signers[1];
+
+    // 🔒 권한 자동 부여 및 확인 (AccessControl Missing Role 에러 원천 방지)
+    const supplierRole = await registry.SUPPLIER_ROLE();
+    const hasRole = await registry.hasRole(supplierRole, supplierSigner.address);
+    if (!hasRole) {
+      console.log(`🔑 [권한 자동 부여] ${supplierSigner.address} 계정에 SUPPLIER_ROLE 부여 중...`);
+      const adminSigner = signers[0];
+      const grantTx = await registry.connect(adminSigner).grantRole(supplierRole, supplierSigner.address);
+      await grantTx.wait();
+    }
 
     console.log(`📝 [원료사 무역원장 등록 요청] 서명자: ${supplierSigner.address} | 배치: ${batchId}`);
 

@@ -1,10 +1,10 @@
 # ChainTrace 14일간 공급망 대량 데이터셋 요약 보고서 (AI 검증용 정답지)
 
-- **생성 일시**: 2026-08-11T11:38:16.762Z
+- **생성 일시**: 2026-08-12T11:55:39.222Z
 - **난수 고정 시드 (PRNG Seed)**: `20260811`
 - **스마트 컨트랙트 주소**:
-  - Registry: `0xa513E6E4b8f2a923D98304ec87F64353C4D5C853`
-  - Operations: `0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6`
+  - Registry: `0x5FbDB2315678afecb367f032d93F642f64180aa3`
+  - Operations: `0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512`
 
 ---
 

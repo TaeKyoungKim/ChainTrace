@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChainTrace - 물류사 이관/콜드체인 무역원장 포탈</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #070a14;
+      --card-bg: #101728;
+      --accent-indigo: #6366f1;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-red: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #1e293b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      padding: 2rem;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 2rem;
+    }
+
+    .header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--accent-indigo);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .header .subtitle {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 0.3rem;
+    }
+
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 1024px) {
+      .grid-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      margin-bottom: 2rem;
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #fff;
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: #040711;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent-indigo);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 0.9rem;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+      transition: transform 0.1s, box-shadow 0.2s;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+    }
+
+    .btn-accept {
+      padding: 0.4rem 0.8rem;
+      background: var(--accent-emerald);
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    .btn-accept:hover {
+      background: #059669;
+    }
+
+    .custodian-info {
+      padding: 0.6rem 0.8rem;
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid var(--accent-cyan);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      color: var(--accent-cyan);
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .cert-card {
+      background: linear-gradient(135deg, #131233, #0b091f);
+      border: 1px solid var(--accent-indigo);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+      display: none;
+    }
+
+    .cert-card.active {
+      display: block;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .cert-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.6rem;
+      font-size: 0.9rem;
+    }
+
+    .cert-row .label {
+      color: var(--text-muted);
+    }
+
+    .cert-row .val {
+      font-weight: 600;
+      text-align: right;
+      word-break: break-all;
+    }
+
+    .badge-status {
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-normal {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-emerald);
+      border: 1px solid var(--accent-emerald);
+    }
+
+    .badge-blocked {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--accent-red);
+      border: 1px solid var(--accent-red);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+    }
+
+    th,
+    td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      color: var(--text-muted);
+      background: #040711;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="header">
+    <div>
+      <h1>🚚 ChainTrace 물류사 이관/콜드체인 무역원장 포탈</h1>
+      <div class="subtitle">제조사 ➔ 물류사 소유권 인수/인도 이관 온체인 서명 및 격리/리콜 이관 차단 제어</div>
+    </div>
+    <div>
+      <label style="font-size:0.8rem; color:var(--text-muted);">접속 물류사 선택:</label>
+      <select id="logisticsSelect" class="form-control" style="width:260px; margin-top:0.3rem;"
+        onchange="loadLogisticsTransfers()">
+        <!-- 물류사 목록 자동로드 -->
+      </select>
+    </div>
+  </div>
+
+  <div class="grid-layout">
+    <!-- 왼쪽: 이관 요청 작성 폼 -->
+    <div>
+      <div class="card">
+        <div class="card-title">📝 소유권 이관 요청 (Custody Transfer Request)</div>
+        <form id="transferForm" onsubmit="handleFormSubmit(event)">
+
+          <div class="form-group">
+            <label>이관 대상 배치 선택 (Target Batch)</label>
+            <select id="targetBatchSelect" class="form-control" onchange="onBatchSelectChange()" required>
+              <option value="">-- 이관 대상을 선택하세요 --</option>
+            </select>
+          </div>
+
+          <div id="custodianInfo" class="custodian-info">
+            📍 <strong>현재 온체인 보관자:</strong> <span id="custodianNameDisplay"></span>
+          </div>
+
+          <div id="blockedBanner"
+            style="display:none; padding:0.8rem; background:rgba(239,68,68,0.15); border:1px solid var(--accent-red); color:var(--accent-red); border-radius:8px; font-size:0.85rem; font-weight:600; margin-bottom:1rem;">
+            🚨 경고: 선택하신 배치는 온체인 상에서 QUARANTINED(격리) 또는 RECALLED(리콜) 상태이므로 물류 이관을 신청할 수 없습니다!
+          </div>
+
+          <div class="form-group">
+            <label>인수 대상 물류사 / 유통사 선택 (Receiver Company)</label>
+            <select id="receiverSelect" class="form-control" required>
+              <!-- 인수자 물류사 목록 -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>운송 및 입고 장소 (Transport Location)</label>
+            <input type="text" id="location" class="form-control" value="인천물류센터 센터A동 102호" required>
+          </div>
+
+          <div class="form-group">
+            <label>콜드체인 및 운송 조건 메모 (Cold-Chain Notes)</label>
+            <input type="text" id="notes" class="form-control" value="콜드체인 센서 4℃ 유지, 습도 55% 적정 규격 운송 중" required>
+          </div>
+
+          <button type="submit" class="btn-submit" id="btnSubmit">🖊️ 소유권 이관 요청 온체인 서명</button>
+        </form>
+
+        <!-- 발행된 이관 전자증명서 카드 -->
+        <div id="certCard" class="cert-card">
+          <div class="badge-status badge-normal" style="margin-bottom:1rem;">PENDING ACCEPTANCE</div>
+          <h3 style="font-size:1.1rem; color:var(--accent-indigo); margin-bottom:1rem;">📜 소유권 이관 무역원장 전자증명서</h3>
+          <div class="cert-row"><span class="label">이관 배치 ID:</span><span class="val" id="certBatchId"></span></div>
+          <div class="cert-row"><span class="label">온체인 보관자(발송):</span><span class="val" id="certFrom"
+              style="font-size:0.75rem;"></span></div>
+          <div class="cert-row"><span class="label">인수 대상자:</span><span class="val" id="certTo"
+              style="font-size:0.75rem;"></span></div>
+          <div class="cert-row"><span class="label">운송 장소:</span><span class="val" id="certLoc"></span></div>
+          <div class="cert-row"><span class="label">콜드체인 메모:</span><span class="val" id="certNotes"></span></div>
+          <div class="cert-row"><span class="label">트랜잭션 해시:</span><span class="val" id="certTxHash"
+              style="font-size:0.7rem; color:var(--accent-indigo);"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 오른쪽: 대기 중인 이관 수락 및 완료 이력 -->
+    <div>
+      <div class="card">
+        <div class="card-title">📥 수신된 이관 수락 요청 목록 (Pending Acceptances)</div>
+        <table>
+          <thead>
+            <tr>
+              <th>배치 ID</th>
+              <th>발송자</th>
+              <th>운송 장소</th>
+              <th>수락 제어</th>
+            </tr>
+          </thead>
+          <tbody id="pendingTableBody">
+            <tr>
+              <td colspan="4" style="color:var(--text-muted); text-align:center;">대기 중인 요청 로딩 중...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📜 물류 이관 완료 이력 목록 (Completed Transfers)</div>
+        <table>
+          <thead>
+            <tr>
+              <th>배치 ID</th>
+              <th>발송자 ➔ 인수자</th>
+              <th>운송 조건</th>
+              <th>완료일시</th>
+            </tr>
+          </thead>
+          <tbody id="completedTableBody">
+            <tr>
+              <td colspan="4" style="color:var(--text-muted); text-align:center;">이관 완료 이력이 없습니다.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let fetchedBatches = [];
+
+    async function loadLogisticsCompanies() {
+      const res = await fetch('/api/logistics/companies');
+      const data = await res.json();
+      if (data.success && data.companies.length > 0) {
+        const select1 = document.getElementById('logisticsSelect');
+        const select2 = document.getElementById('receiverSelect');
+
+        select1.innerHTML = data.companies.map(c => `<option value="${c.address}">${c.company_name} (${c.address.slice(0, 6)}...)</option>`).join('');
+        select2.innerHTML = data.companies.map(c => `<option value="${c.address}">${c.company_name} (${c.address.slice(0, 6)}...)</option>`).join('');
+
+        loadLogisticsTransfers();
+      }
+    }
+
+    async function loadTransferableBatches() {
+      const res = await fetch('/api/logistics/transferable-batches');
+      const data = await res.json();
+      if (data.success && data.batches.length > 0) {
+        fetchedBatches = data.batches;
+        const select = document.getElementById('targetBatchSelect');
+        select.innerHTML = '<option value="">-- 이관 대상을 선택하세요 --</option>' +
+          data.batches.map(b => {
+            const statusLabel = b.isTransferable ? '' : ` [🚨 ${b.status}]`;
+            return `<option value="${b.batchId}" data-transferable="${b.isTransferable}" data-custodian="${b.custodian}" data-custodianname="${b.custodianName}">[${b.batchId}] ${b.productName}${statusLabel}</option>`;
+          }).join('');
+      }
+    }
+
+    function onBatchSelectChange() {
+      const select = document.getElementById('targetBatchSelect');
+      const opt = select.options[select.selectedIndex];
+      const isTransferable = opt.getAttribute('data-transferable') === 'true';
+      const custodianName = opt.getAttribute('data-custodianname');
+      const custodianAddr = opt.getAttribute('data-custodian');
+
+      const btn = document.getElementById('btnSubmit');
+      const banner = document.getElementById('blockedBanner');
+      const infoBox = document.getElementById('custodianInfo');
+
+      if (select.value) {
+        infoBox.style.display = 'block';
+        document.getElementById('custodianNameDisplay').innerText = `${custodianName || custodianAddr} (${(custodianAddr || '').slice(0, 6)}...)`;
+      } else {
+        infoBox.style.display = 'none';
+      }
+
+      if (select.value && !isTransferable) {
+        banner.style.display = 'block';
+        btn.disabled = true;
+      } else {
+        banner.style.display = 'none';
+        btn.disabled = false;
+      }
+    }
+
+    async function loadLogisticsTransfers() {
+      const addr = document.getElementById('logisticsSelect').value;
+      if (!addr) return;
+
+      const res = await fetch(`/api/logistics/transfers/${addr}`);
+      const data = await res.json();
+
+      const pBody = document.getElementById('pendingTableBody');
+      if (data.success && data.pendingTransfers.length > 0) {
+        pBody.innerHTML = data.pendingTransfers.map(p => `
+          <tr>
+            <td style="font-weight:600; color:var(--accent-cyan);">${p.batch_id}</td>
+            <td style="font-size:0.75rem; color:var(--text-muted);">${p.from_address.slice(0, 8)}...</td>
+            <td>${p.location}</td>
+            <td>
+              <button type="button" class="btn-accept" onclick="acceptTransfer('${p.batch_id}')">🤝 이관 수락</button>
+            </td>
+          </tr>
+        `).join('');
+      } else {
+        pBody.innerHTML = '<tr><td colspan="4" style="color:var(--text-muted); text-align:center;">대기 중인 이관 요청이 없습니다.</td></tr>';
+      }
+
+      const cBody = document.getElementById('completedTableBody');
+      if (data.success && data.completedTransfers.length > 0) {
+        cBody.innerHTML = data.completedTransfers.map(c => `
+          <tr>
+            <td style="font-weight:600; color:var(--accent-emerald);">${c.batch_id}</td>
+            <td style="font-size:0.75rem; color:var(--text-muted);">${c.from_address.slice(0, 6)}... ➔ ${c.to_address.slice(0, 6)}...</td>
+            <td style="font-size:0.8rem;">${c.notes}</td>
+            <td>${new Date(c.timestamp).toLocaleDateString()}</td>
+          </tr>
+        `).join('');
+      } else {
+        cBody.innerHTML = '<tr><td colspan="4" style="color:var(--text-muted); text-align:center;">이관 완료 이력이 없습니다.</td></tr>';
+      }
+    }
+
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      const batchId = document.getElementById('targetBatchSelect').value;
+      if (!batchId) return;
+
+      const btn = document.getElementById('btnSubmit');
+      btn.innerText = "⏳ 이관 요청 온체인 서명 중...";
+      btn.disabled = true;
+
+      const payload = {
+        senderAddress: document.getElementById('logisticsSelect').value,
+        batchId,
+        toAddress: document.getElementById('receiverSelect').value,
+        location: document.getElementById('location').value,
+        notes: document.getElementById('notes').value
+      };
+
+      try {
+        const res = await fetch('/api/logistics/request-transfer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          const t = data.transfer;
+          document.getElementById('certBatchId').innerText = t.batchId;
+          document.getElementById('certFrom').innerText = t.fromAddress;
+          document.getElementById('certTo').innerText = t.toAddress;
+          document.getElementById('certLoc').innerText = t.location;
+          document.getElementById('certNotes').innerText = t.notes;
+          document.getElementById('certTxHash').innerText = t.transactionHash;
+          document.getElementById('certCard').classList.add('active');
+
+          loadLogisticsTransfers();
+          loadTransferableBatches();
+        } else {
+          alert('이관 요청 실패: ' + data.message);
+        }
+      } catch (err) {
+        alert('오류 발생: ' + err.message);
+      } finally {
+        btn.innerText = "🖊️ 소유권 이관 요청 온체인 서명";
+        btn.disabled = false;
+      }
+    }
+
+    async function acceptTransfer(batchId) {
+      if (!confirm(`[${batchId}] 배치의 소유권 및 보관을 온체인 인도 인수 수락하시겠습니까?`)) return;
+
+      try {
+        const res = await fetch('/api/logistics/accept-transfer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            receiverAddress: document.getElementById('logisticsSelect').value,
+            batchId
+          })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          alert(`🤝 인도 인수 완료!\n- 배치 ID: ${batchId}\n- 새 온체인 보관자: ${data.receipt.newCustodian}`);
+          loadLogisticsTransfers();
+          loadTransferableBatches();
+        } else {
+          alert('수락 실패: ' + data.message);
+        }
+      } catch (err) {
+        alert('오류 발생: ' + err.message);
+      }
+    }
+
+    window.onload = () => {
+      loadLogisticsCompanies();
+      loadTransferableBatches();
+    };
+  </script>
+</body>
+
+</html>

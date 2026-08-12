@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,74 +18,235 @@
       --border-color: #1e293b;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; }
-    body { background-color: var(--bg-dark); color: var(--text-main); padding: 2rem; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      padding: 2rem;
+    }
 
     .header {
-      display: flex; justify-content: space-between; align-items: center;
-      padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 2rem;
     }
-    .header h1 { font-size: 1.8rem; font-weight: 700; color: var(--accent-violet); display: flex; align-items: center; gap: 0.5rem; }
-    .header .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.3rem; }
 
-    .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
-    @media (max-width: 1024px) { .grid-layout { grid-template-columns: 1fr; } }
+    .header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--accent-violet);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .header .subtitle {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 0.3rem;
+    }
+
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 1024px) {
+      .grid-layout {
+        grid-template-columns: 1fr;
+      }
+    }
 
     .card {
-      background: var(--card-bg); border: 1px solid var(--border-color);
-      border-radius: 12px; padding: 1.5rem; box-shadow: 0 8px 24px rgba(0,0,0,0.3); margin-bottom: 2rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      margin-bottom: 2rem;
     }
-    .card-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.5rem; color: #fff; }
 
-    .form-group { margin-bottom: 1.2rem; }
-    .form-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; }
-    .form-control {
-      width: 100%; padding: 0.75rem 1rem; background: #070a12; border: 1px solid var(--border-color);
-      border-radius: 8px; color: var(--text-main); font-size: 0.95rem; outline: none; transition: border 0.2s;
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #fff;
     }
-    .form-control:focus { border-color: var(--accent-violet); }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: #070a12;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent-violet);
+    }
 
     .btn-submit {
-      width: 100%; padding: 0.9rem; background: linear-gradient(135deg, #a855f7, #6366f1);
-      border: none; border-radius: 8px; color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer;
-      box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4); transition: transform 0.1s, box-shadow 0.2s;
+      width: 100%;
+      padding: 0.9rem;
+      background: linear-gradient(135deg, #a855f7, #6366f1);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+      transition: transform 0.1s, box-shadow 0.2s;
     }
-    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(168, 85, 247, 0.6); }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(168, 85, 247, 0.6);
+    }
 
     .btn-recall {
-      padding: 0.4rem 0.8rem; background: var(--accent-red); border: none; border-radius: 6px;
-      color: #fff; font-weight: 600; font-size: 0.75rem; cursor: pointer;
+      padding: 0.4rem 0.8rem;
+      background: var(--accent-red);
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.75rem;
+      cursor: pointer;
     }
-    .btn-recall:hover { background: #ff6b81; }
+
+    .btn-recall:hover {
+      background: #ff6b81;
+    }
 
     .raw-item {
-      display: flex; align-items: center; justify-content: space-between; padding: 0.75rem;
-      border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 0.5rem; background: #070a12;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      background: #070a12;
     }
-    .raw-item.disabled { opacity: 0.5; border-color: var(--accent-red); background: rgba(255,71,87,0.05); }
+
+    .raw-item.disabled {
+      opacity: 0.5;
+      border-color: var(--accent-red);
+      background: rgba(255, 71, 87, 0.05);
+    }
 
     .badge-status {
-      padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
     }
-    .badge-normal { background: rgba(46,213,115,0.15); color: var(--accent-green); border: 1px solid var(--accent-green); }
-    .badge-recalled { background: rgba(255,71,87,0.2); color: var(--accent-red); border: 1px solid var(--accent-red); }
+
+    .badge-normal {
+      background: rgba(46, 213, 115, 0.15);
+      color: var(--accent-green);
+      border: 1px solid var(--accent-green);
+    }
+
+    .badge-recalled {
+      background: rgba(255, 71, 87, 0.2);
+      color: var(--accent-red);
+      border: 1px solid var(--accent-red);
+    }
 
     .cert-card {
-      background: linear-gradient(135deg, #1d1233, #0f0a1c); border: 1px solid var(--accent-violet);
-      border-radius: 12px; padding: 1.5rem; margin-top: 1.5rem; display: none;
+      background: linear-gradient(135deg, #1d1233, #0f0a1c);
+      border: 1px solid var(--accent-violet);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+      display: none;
     }
-    .cert-card.active { display: block; animation: fadeIn 0.4s ease-out; }
-    .cert-row { display: flex; justify-content: space-between; margin-bottom: 0.6rem; font-size: 0.9rem; }
-    .cert-row .label { color: var(--text-muted); }
-    .cert-row .val { font-weight: 600; text-align: right; word-break: break-all; }
 
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.85rem; }
-    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border-color); }
-    th { color: var(--text-muted); background: #070a12; }
+    .cert-card.active {
+      display: block;
+      animation: fadeIn 0.4s ease-out;
+    }
 
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .cert-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.6rem;
+      font-size: 0.9rem;
+    }
+
+    .cert-row .label {
+      color: var(--text-muted);
+    }
+
+    .cert-row .val {
+      font-weight: 600;
+      text-align: right;
+      word-break: break-all;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+    }
+
+    th,
+    td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      color: var(--text-muted);
+      background: #070a12;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   </style>
 </head>
+
 <body>
 
   <div class="header">
@@ -94,7 +256,8 @@
     </div>
     <div>
       <label style="font-size:0.8rem; color:var(--text-muted);">접속 제조사 선택:</label>
-      <select id="manufacturerSelect" class="form-control" style="width:250px; margin-top:0.3rem;" onchange="loadManufacturerBatches()">
+      <select id="manufacturerSelect" class="form-control" style="width:250px; margin-top:0.3rem;"
+        onchange="loadManufacturerBatches()">
         <option value="0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC">(주)한국홍삼제조</option>
         <option value="0x90F79bf6EB2c4f870365E785982E1f101E93b906">한독바이오제약</option>
         <option value="0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65">CJ웰케어제조센터</option>
@@ -120,7 +283,8 @@
             <label>완제품 배치 ID (Batch ID)</label>
             <div style="display:flex; gap:0.5rem;">
               <input type="text" id="batchId" class="form-control" placeholder="MFG-EXTRACT-20260811-001" required>
-              <button type="button" class="form-control" style="width:auto; cursor:pointer;" onclick="generateAutoBatchId()">⚡ 자동생성</button>
+              <button type="button" class="form-control" style="width:auto; cursor:pointer;"
+                onclick="generateAutoBatchId()">⚡ 자동생성</button>
             </div>
           </div>
 
@@ -142,7 +306,8 @@
 
           <div class="form-group">
             <label>제조 공정 메타데이터 (Metadata Hash / IPFS)</label>
-            <input type="text" id="metadataHash" class="form-control" value="ipfs://QmManufacturedSpec_20260811" required>
+            <input type="text" id="metadataHash" class="form-control" value="ipfs://QmManufacturedSpec_20260811"
+              required>
           </div>
 
           <button type="submit" class="btn-submit" id="btnSubmit">🖊️ 완제품 무역원장 전자서명 및 계보 연결</button>
@@ -154,10 +319,13 @@
           <h3 style="font-size:1.1rem; color:var(--accent-violet); margin-bottom:1rem;">📜 완제품 계보 무역원장 전자증명서</h3>
           <div class="cert-row"><span class="label">완제품 배치 ID:</span><span class="val" id="certBatchId"></span></div>
           <div class="cert-row"><span class="label">완제품명:</span><span class="val" id="certProduct"></span></div>
-          <div class="cert-row"><span class="label">연결 원료 계보:</span><span class="val" id="certParents" style="color:var(--accent-violet);"></span></div>
+          <div class="cert-row"><span class="label">연결 원료 계보:</span><span class="val" id="certParents"
+              style="color:var(--accent-violet);"></span></div>
           <div class="cert-row"><span class="label">생산 수량:</span><span class="val" id="certQty"></span></div>
-          <div class="cert-row"><span class="label">서명 제조사:</span><span class="val" id="certManufacturer" style="font-size:0.75rem;"></span></div>
-          <div class="cert-row"><span class="label">트랜잭션 해시:</span><span class="val" id="certTxHash" style="font-size:0.7rem; color:var(--accent-violet);"></span></div>
+          <div class="cert-row"><span class="label">서명 제조사:</span><span class="val" id="certManufacturer"
+              style="font-size:0.75rem;"></span></div>
+          <div class="cert-row"><span class="label">트랜잭션 해시:</span><span class="val" id="certTxHash"
+              style="font-size:0.7rem; color:var(--accent-violet);"></span></div>
         </div>
       </div>
     </div>
@@ -176,7 +344,9 @@
             </tr>
           </thead>
           <tbody id="mfgBatchesTableBody">
-            <tr><td colspan="4" style="color:var(--text-muted); text-align:center;">로딩 중...</td></tr>
+            <tr>
+              <td colspan="4" style="color:var(--text-muted); text-align:center;">로딩 중...</td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -186,7 +356,7 @@
   <script>
     function generateAutoBatchId() {
       const rand = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-      document.getElementById('batchId').value = `MFG-EXT-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${rand}`;
+      document.getElementById('batchId').value = `MFG-EXT-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${rand}`;
     }
 
     async function loadRawBatches() {
@@ -219,7 +389,7 @@
       const mfgAddr = document.getElementById('manufacturerSelect').value;
       const res = await fetch(`/api/manufacturer/batches/${mfgAddr}`);
       const data = await res.json();
-      
+
       const tbody = document.getElementById('mfgBatchesTableBody');
       if (data.success && data.batches.length > 0) {
         tbody.innerHTML = data.batches.map(b => `
@@ -228,10 +398,10 @@
             <td>${b.product_name}</td>
             <td style="font-size:0.75rem; color:var(--text-muted);">${(b.parentBatchIds || []).join(', ')}</td>
             <td>
-              ${b.isRecalled ? 
-                '<span class="badge-status badge-recalled">RECALLED</span>' : 
-                `<button type="button" class="btn-recall" onclick="triggerSelfRecall('${b.batch_id}')">🚨 리콜 발령</button>`
-              }
+              ${b.isRecalled ?
+            '<span class="badge-status badge-recalled">RECALLED</span>' :
+            `<button type="button" class="btn-recall" onclick="triggerSelfRecall('${b.batch_id}')">🚨 리콜 발령</button>`
+          }
             </td>
           </tr>
         `).join('');
@@ -242,7 +412,7 @@
 
     async function handleFormSubmit(e) {
       e.preventDefault();
-      
+
       const selectedParents = Array.from(document.querySelectorAll('input[name="parentRaw"]:checked')).map(cb => cb.value);
       if (selectedParents.length === 0) {
         alert('⚠️ 완제품 제조에 투입할 상위 원료 배치를 최소 1개 이상 선택해 주세요!');
@@ -329,4 +499,5 @@
     };
   </script>
 </body>
+
 </html>

@@ -38,6 +38,9 @@
 5. **🌐 회사별 독립 웹 무역원장 포탈 & 결함 시나리오 처리 (Step-by-Step Portals)**
    - **Step 1 [원료 공급사 포탈]** ([`public/supplier_portal.html`](file:///c:/apps/ChainTrace/public/supplier_portal.html)): 1차 원료 생산 수급 등록, 온체인 서명 수록 및 디지털 무역원장 전자증명서 카드 실시간 발급
    - **Step 2 [제조사 포탈]** ([`public/manufacturer_portal.html`](file:///c:/apps/ChainTrace/public/manufacturer_portal.html)): 상위 원료 계보(Genealogy) 연결 완제품 생산, **🚨 리콜/격리 원료 투입 사전 차단 (`400 Bad Request`)**, **🚨 자사 완제품 온체인 자발적 리콜 발령**
+   - **Step 3 [검사기관 포탈]** ([`public/inspector_portal.html`](file:///c:/apps/ChainTrace/public/inspector_portal.html)): 5개 공인 검사기관 시험성적서(IPFS) 서명 수록, **🚨 검사 불합격(FAILED) 등록 시 온체인 상에서 배치 상태 자동 격리(`QUARANTINED`) 및 유통 차단**
+   - **Step 4 [물류사 포탈]** ([`public/logistics_portal.html`](file:///c:/apps/ChainTrace/public/logistics_portal.html)): 제조사 ➔ 물류사 소유권 이관 요청/수락 서명, 콜드체인 운송 메모 수록, **🚨 격리/리콜 배치 물류 이관 신청 사전 차단 (`400 Bad Request`)**
+   - **Step 5 [유통사 포탈]** ([`public/distributor_portal.html`](file:///c:/apps/ChainTrace/public/distributor_portal.html)): 물류사 ➔ 유통사 매장 최종 입고 수락, 매장 재고 현황 및 **🚨 상위 계보 오염 실시간 온체인 리콜 모니터링 & POS 판매 자동 차단 뷰어**
 
 ---
 
@@ -78,13 +81,22 @@ node scripts/check_accounts.js
 node scripts/run_simulation.js
 ```
 
-### 4. Step 1 & Step 2 포탈 통합 검증 테스트
+### 4. 회사별 포탈 통합 검증 독립 테스트 실행
 ```bash
 # Step 1: 원료 공급사 웹 포탈 검증
 node scripts/test_supplier_portal.js
 
 # Step 2: 제조사 웹 포탈 & 결함 시나리오 차단 검증
 node scripts/test_manufacturer_portal.js
+
+# Step 3: 검사기관 웹 포탈 & 온체인 자동 격리 검증
+node scripts/test_inspector_portal.js
+
+# Step 4: 물류사 웹 포탈 & 콜드체인 이관/차단 검증
+node scripts/test_logistics_portal.js
+
+# Step 5: 유통사 웹 포탈 & 실시간 리콜 모니터링 검증
+node scripts/test_distributor_portal.js
 ```
 
 ### 5. 14일치 308개 대량 온체인 데이터셋 생성 및 조회
@@ -99,6 +111,9 @@ node server/index.js
 ```
 - **원료 공급사 웹 포탈 접속**: `http://localhost:5000/supplier_portal.html`
 - **제조사 웹 포탈 접속**: `http://localhost:5000/manufacturer_portal.html`
+- **검사기관 웹 포탈 접속**: `http://localhost:5000/inspector_portal.html`
+- **물류사 웹 포탈 접속**: `http://localhost:5000/logistics_portal.html`
+- **유통사 웹 포탈 접속**: `http://localhost:5000/distributor_portal.html`
 
 ---
 
@@ -111,7 +126,10 @@ ChainTrace/
 │   └── ChainTraceOperations.sol     # 스마트 컨트랙트 2 (이관, 검사, 리콜)
 ├── public/
 │   ├── supplier_portal.html         # Step 1: 원료 공급사 웹 포탈
-│   └── manufacturer_portal.html     # Step 2: 제조사 웹 포탈 (리콜 차단)
+│   ├── manufacturer_portal.html     # Step 2: 제조사 웹 포탈 (리콜 차단)
+│   ├── inspector_portal.html        # Step 3: 검사기관 웹 포탈 (자동 격리)
+│   ├── logistics_portal.html        # Step 4: 물류사 웹 포탈 (이관 차단)
+│   └── distributor_portal.html      # Step 5: 유통사 웹 포탈 (리콜 모니터링)
 ├── server/
 │   ├── index.js                     # Express REST API 서버 엔트리
 │   ├── db.js                        # DuckDB 데이터베이스 스키마 & 연결
@@ -119,21 +137,28 @@ ChainTrace/
 │   └── routes/
 │       ├── api.js                   # REST API 라우터 (CTE 계보 추적)
 │       ├── supplier.js              # Step 1: 원료사 백엔드 API 라우터
-│       └── manufacturer.js          # Step 2: 제조사 백엔드 API 라우터
+│       ├── manufacturer.js          # Step 2: 제조사 백엔드 API 라우터
+│       ├── inspector.js             # Step 3: 검사기관 백엔드 API 라우터
+│       ├── logistics.js             # Step 4: 물류사 백엔드 API 라우터
+│       └── distributor.js           # Step 5: 유통사 백엔드 API 라우터
 ├── scripts/
 │   ├── check_accounts.js            # 60개 계정 잔액 검증 스크립트
 │   ├── run_simulation.js            # 컨트랙트 시뮬레이션 스크립트
 │   ├── generate_dataset.js          # 14일치 308개 배치 데이터셋 생성기
 │   ├── query_onchain_data.js        # 실시간 온체인 데이터 조회기
 │   ├── test_supplier_portal.js      # Step 1 원료사 독립 검증 스크립트
-│   └── test_manufacturer_portal.js  # Step 2 제조사 & 결함 차단 독립 검증
+│   ├── test_manufacturer_portal.js  # Step 2 제조사 & 결함 차단 독립 검증
+│   ├── test_inspector_portal.js     # Step 3 검사기관 & 자동 격리 독립 검증
+│   ├── test_logistics_portal.js     # Step 4 물류사 & 콜드체인 차단 독립 검증
+│   └── test_distributor_portal.js   # Step 5 유통사 & 실시간 리콜 독립 검증
 ├── data/
 │   ├── supply_chain_dataset_summary.md  # AI 검증용 정답지 문서
 │   └── supply_chain_dataset_summary.json
 ├── test/
 │   └── contracts.test.js            # Hardhat 통합 테스트 (8/8 Pass)
 ├── images/
-│   └── chaintrace_banner.png        # 아키텍처 배너 이미지
+│   ├── chaintrace_banner.png        # 아키텍처 배너 이미지
+│   └── langgraph_agent_architecture.png # LangGraph Agent 상태 그래프 다이어그램
 ├── hardhat.config.js                # Hardhat 설정 (Solidity 0.8.28, 60개 계정)
 ├── package.json                     # Pure Node.js 의존성 및 스크립트
 └── README.md                        # 프로젝트 설명 문서
@@ -145,8 +170,12 @@ ChainTrace/
 
 - 📄 [ChainTrace 제안서 (`ChainTrace_Proposal.md`)](file:///c:/apps/ChainTrace/ChainTrace_Proposal.md)
 - 📄 [스마트 컨트랙트 상세 명세서 (`ChainTrace_SmartContracts_Spec.md`)](file:///c:/apps/ChainTrace/ChainTrace_SmartContracts_Spec.md)
+- 📄 [LangGraph AI Agent 상세 명세서 (`ChainTrace_LangGraph_Agent_Architecture.md`)](file:///c:/apps/ChainTrace/ChainTrace_LangGraph_Agent_Architecture.md)
 - 📄 [Phase 1 완료 보고서 (`Phase1_Completion_Report.md`)](file:///c:/apps/ChainTrace/Phase1_Completion_Report.md)
 - 📄 [Phase 2 완료 보고서 (`Phase2_Completion_Report.md`)](file:///c:/apps/ChainTrace/Phase2_Completion_Report.md)
 - 📄 [Step 1 원료사 포탈 완료 보고서 (`Step1_Supplier_Portal_Report.md`)](file:///c:/apps/ChainTrace/Step1_Supplier_Portal_Report.md)
 - 📄 [Step 2 제조사 포탈 완료 보고서 (`Step2_Manufacturer_Portal_Report.md`)](file:///c:/apps/ChainTrace/Step2_Manufacturer_Portal_Report.md)
+- 📄 [Step 3 검사기관 포탈 완료 보고서 (`Step3_Inspector_Portal_Report.md`)](file:///c:/apps/ChainTrace/Step3_Inspector_Portal_Report.md)
+- 📄 [Step 4 물류사 포탈 완료 보고서 (`Step4_Logistics_Portal_Report.md`)](file:///c:/apps/ChainTrace/Step4_Logistics_Portal_Report.md)
+- 📄 [Step 5 유통사 포탈 완료 보고서 (`Step5_Distributor_Portal_Report.md`)](file:///c:/apps/ChainTrace/Step5_Distributor_Portal_Report.md)
 - 📄 [14일치 데이터셋 요약 정답지 (`data/supply_chain_dataset_summary.md`)](file:///c:/apps/ChainTrace/data/supply_chain_dataset_summary.md)

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChainTrace - 유통사 매장 입고 & 온체인 리콜 차단 포탈</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #090c15;
+      --card-bg: #121827;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-emerald: #10b981;
+      --accent-cyan: #06b6d4;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #1e293b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      padding: 2rem;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 2rem;
+    }
+
+    .header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--accent-amber);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .header .subtitle {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 0.3rem;
+    }
+
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 1024px) {
+      .grid-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      margin-bottom: 2rem;
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #fff;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: #050812;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent-amber);
+    }
+
+    .btn-accept {
+      padding: 0.5rem 1rem;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .btn-accept:hover {
+      background: #b45309;
+    }
+
+    .btn-block-sale {
+      padding: 0.4rem 0.8rem;
+      background: var(--accent-rose);
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    .btn-block-sale:hover {
+      background: #e11d48;
+    }
+
+    .monitor-banner {
+      padding: 1.2rem;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .monitor-banner.safe {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--accent-emerald);
+      color: var(--accent-emerald);
+    }
+
+    .monitor-banner.danger {
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid var(--accent-rose);
+      color: var(--accent-rose);
+      animation: pulse 2s infinite;
+    }
+
+    .alert-card {
+      background: #180d19;
+      border: 1px solid var(--accent-rose);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .alert-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent-rose);
+      margin-bottom: 0.5rem;
+    }
+
+    .alert-desc {
+      font-size: 0.85rem;
+      color: var(--text-main);
+      margin-bottom: 0.6rem;
+    }
+
+    .badge-status {
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-normal {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-emerald);
+      border: 1px solid var(--accent-emerald);
+    }
+
+    .badge-recalled {
+      background: rgba(244, 63, 94, 0.2);
+      color: var(--accent-rose);
+      border: 1px solid var(--accent-rose);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+    }
+
+    th,
+    td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      color: var(--text-muted);
+      background: #050812;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.4);
+      }
+
+      70% {
+        box-shadow: 0 0 0 10px rgba(244, 63, 94, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(244, 63, 94, 0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="header">
+    <div>
+      <h1>🏬 ChainTrace 유통사 매장 입고 & 리콜 모니터링 포탈</h1>
+      <div class="subtitle">물류사 ➔ 유통사 매장 최종 입고 수락 및 온체인 상위 계보(Genealogy) 오염 실시간 판매 차단</div>
+    </div>
+    <div>
+      <label style="font-size:0.8rem; color:var(--text-muted);">접속 유통사 선택:</label>
+      <select id="distributorSelect" class="form-control" style="width:250px; margin-top:0.3rem;"
+        onchange="loadDistributorData()">
+        <!-- 유통사 목록 자동로드 -->
+      </select>
+    </div>
+  </div>
+
+  <!-- 🚨 온체인 리콜 & 격리 실시간 차단 모니터링 대시보드 -->
+  <div id="monitorBanner" class="monitor-banner safe">
+    <span id="bannerText">🟢 온체인 실시간 모니터링: 모든 진열 상품이 안전합니다 (리콜/격리 품목 없음)</span>
+    <button type="button" class="btn-accept" style="padding:0.3rem 0.8rem; font-size:0.8rem;"
+      onclick="loadRecallMonitor()">🔄 실시간 스캔</button>
+  </div>
+
+  <div class="grid-layout">
+    <!-- 왼쪽: 입고 수락 및 감지된 리콜 알림 카드 -->
+    <div>
+      <div class="card">
+        <div class="card-title">📥 매장/창고 수신 입고 수락 (Store Custody Acceptance)</div>
+        <table>
+          <thead>
+            <tr>
+              <th>배치 ID</th>
+              <th>발송 물류사</th>
+              <th>입고 수락</th>
+            </tr>
+          </thead>
+          <tbody id="pendingTableBody">
+            <tr>
+              <td colspan="3" style="color:var(--text-muted); text-align:center;">대기 중인 요청 로딩 중...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🚨 온체인 오염/리콜 실시간 경고 목록 (Active Recall Alerts)</div>
+        <div id="alertsContainer">
+          <div style="color:var(--text-muted); font-size:0.85rem;">실시간 모니터링 중...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 오른쪽: 매장 보관 재고 및 판매 차단 현황 -->
+    <div>
+      <div class="card">
+        <div class="card-title">📦 유통 매장 진열/보관 완제품 목록</div>
+        <table>
+          <thead>
+            <tr>
+              <th>배치 ID</th>
+              <th>완제품명</th>
+              <th>수량</th>
+              <th>판매/보관 상태</th>
+            </tr>
+          </thead>
+          <tbody id="inventoryTableBody">
+            <tr>
+              <td colspan="4" style="color:var(--text-muted); text-align:center;">재고 로딩 중...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function loadDistributorCompanies() {
+      const res = await fetch('/api/distributor/companies');
+      const data = await res.json();
+      if (data.success && data.companies.length > 0) {
+        const select = document.getElementById('distributorSelect');
+        select.innerHTML = data.companies.map(c => `<option value="${c.address}">${c.company_name} (${c.address.slice(0, 6)}...)</option>`).join('');
+        loadDistributorData();
+      }
+    }
+
+    async function loadDistributorData() {
+      loadPendingTransfers();
+      loadDistributorInventory();
+      loadRecallMonitor();
+    }
+
+    async function loadPendingTransfers() {
+      const addr = document.getElementById('distributorSelect').value;
+      if (!addr) return;
+
+      const res = await fetch(`/api/logistics/transfers/${addr}`);
+      const data = await res.json();
+
+      const tbody = document.getElementById('pendingTableBody');
+      if (data.success && data.pendingTransfers.length > 0) {
+        tbody.innerHTML = data.pendingTransfers.map(p => `
+          <tr>
+            <td style="font-weight:600; color:var(--accent-amber);">${p.batch_id}</td>
+            <td style="font-size:0.75rem; color:var(--text-muted);">${p.from_address.slice(0, 8)}...</td>
+            <td>
+              <button type="button" class="btn-accept" onclick="confirmReceipt('${p.batch_id}')">🏬 입고 확정</button>
+            </td>
+          </tr>
+        `).join('');
+      } else {
+        tbody.innerHTML = '<tr><td colspan="3" style="color:var(--text-muted); text-align:center;">수신된 입고 대기 항목이 없습니다.</td></tr>';
+      }
+    }
+
+    async function loadDistributorInventory() {
+      const addr = document.getElementById('distributorSelect').value;
+      if (!addr) return;
+
+      const res = await fetch(`/api/distributor/inventory/${addr}`);
+      const data = await res.json();
+
+      const tbody = document.getElementById('inventoryTableBody');
+      if (data.success && data.inventory.length > 0) {
+        tbody.innerHTML = data.inventory.map(i => `
+          <tr>
+            <td style="font-weight:600; color:var(--accent-cyan);">${i.batch_id}</td>
+            <td>${i.product_name}</td>
+            <td>${i.quantity} ${i.unit}</td>
+            <td>
+              ${i.isBlocked ?
+            '<span class="badge-status badge-recalled">⛔ 판매 차단 (리콜/격리)</span>' :
+            '<span class="badge-status badge-normal">🟢 매장 정상 판매 중</span>'
+          }
+            </td>
+          </tr>
+        `).join('');
+      } else {
+        tbody.innerHTML = '<tr><td colspan="4" style="color:var(--text-muted); text-align:center;">매장 보관 제품이 없습니다.</td></tr>';
+      }
+    }
+
+    async function loadRecallMonitor() {
+      const res = await fetch('/api/distributor/recall-monitor');
+      const data = await res.json();
+
+      const banner = document.getElementById('monitorBanner');
+      const bannerText = document.getElementById('bannerText');
+      const container = document.getElementById('alertsContainer');
+
+      if (data.success && data.hasAlerts) {
+        banner.className = "monitor-banner danger";
+        bannerText.innerHTML = `🚨 온체인 실시간 모니터링: <strong>총 ${data.alertCount}건의 리콜/격리 오염 품목 감지!</strong> 매장 진열대 판매 차단 필요!`;
+
+        container.innerHTML = data.alerts.map(a => `
+          <div class="alert-card">
+            <div class="alert-title">${a.type === 'RECALL' ? '🚨 ON-CHAIN RECALL ALERT' : '⚠️ ON-CHAIN QUARANTINE ALERT'}</div>
+            <div class="alert-desc">
+              <strong>오염 대상 배치:</strong> [${a.batchId}] (${a.productName})<br>
+              <strong>사유 / 상세:</strong> ${a.reason || a.testDetails || '온체인 상태 변경'}<br>
+              <span style="font-size:0.75rem; color:var(--text-muted);">감지 일시: ${new Date(a.timestamp).toLocaleString()}</span>
+            </div>
+            <button type="button" class="btn-block-sale" onclick="alert('⛔ 매장 POS 기기 연동 완료: [${a.batchId}] 품목의 바코드 계산이 자동으로 차단되었습니다.')">⛔ POS 판매 자동 차단</button>
+          </div>
+        `).join('');
+      } else {
+        banner.className = "monitor-banner safe";
+        bannerText.innerHTML = "🟢 온체인 실시간 모니터링: 모든 진열 상품이 안전합니다 (리콜/격리 품목 없음)";
+        container.innerHTML = '<div style="color:var(--text-muted); font-size:0.85rem; text-align:center; padding:1rem;">현재 발령된 온체인 리콜/격리 알림이 없습니다.</div>';
+      }
+    }
+
+    async function confirmReceipt(batchId) {
+      if (!confirm(`[${batchId}] 배치의 매장 입고를 온체인 최종 확정하시겠습니까?`)) return;
+
+      try {
+        const res = await fetch('/api/distributor/confirm-receipt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            distributorAddress: document.getElementById('distributorSelect').value,
+            batchId
+          })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          alert(`🏬 매장 최종 입고 완료!\n- 배치 ID: ${batchId}\n- 최종 온체인 보관자: ${data.receipt.newCustodian}`);
+          loadDistributorData();
+        } else {
+          alert('입고 수락 실패: ' + data.message);
+        }
+      } catch (err) {
+        alert('오류 발생: ' + err.message);
+      }
+    }
+
+    window.onload = () => {
+      loadDistributorCompanies();
+    };
+  </script>
+</body>
+
+</html>
