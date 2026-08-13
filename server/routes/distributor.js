@@ -27,6 +27,8 @@ router.post("/confirm-receipt", async (req, res) => {
       return res.status(400).json({ success: false, message: "필수 파라미터(유통사 주소, 배치 ID)가 누락되었습니다." });
     }
 
+    const cleanDistributorAddress = ethers.getAddress(distributorAddress.toLowerCase());
+
     const summaryPath = path.join(__dirname, "..", "..", "data", "supply_chain_dataset_summary.json");
     const summary = JSON.parse(fs.readFileSync(summaryPath, "utf-8"));
     const registryAddr = summary.contracts.registry;
@@ -36,9 +38,9 @@ router.post("/confirm-receipt", async (req, res) => {
     const operations = await ethers.getContractAt("ChainTraceOperations", operationsAddr);
 
     const signers = await ethers.getSigners();
-    const distSigner = signers.find(s => s.address.toLowerCase() === distributorAddress.toLowerCase()) || signers[35];
+    const distSigner = signers.find(s => s.address.toLowerCase() === cleanDistributorAddress.toLowerCase()) || signers[35];
 
-    // 🔒 유통사 권한 자동 확인 및 부여 (AccessControl Missing Role 방지)
+    // 🔒 유통사 권한 자동 확인 및 부여
     const distRole = await registry.DISTRIBUTOR_ROLE();
     const hasRole = await registry.hasRole(distRole, distSigner.address);
     if (!hasRole) {
@@ -54,7 +56,7 @@ router.post("/confirm-receipt", async (req, res) => {
     const receipt = await tx.wait();
 
     const acceptTime = new Date().toISOString();
-    await runQuery(`UPDATE transfers SET is_pending = false, is_completed = true WHERE batch_id = ? AND to_address = ?`, [batchId, distSigner.address]);
+    await runQuery(`UPDATE transfers SET is_pending = false, is_completed = true WHERE batch_id = ? AND LOWER(to_address) = LOWER(?)`, [batchId, distSigner.address]);
 
     const newCustodian = await operations.getCurrentCustodian(batchId);
 
@@ -93,7 +95,6 @@ router.get("/inventory/:address", async (req, res) => {
     const myInventory = [];
     for (const b of allBatches) {
       const custodian = await operations.getCurrentCustodian(b.batch_id);
-      // 온체인 상 실시간 현재 보관자(custodian)가 해당 유통사이거나 completed transfer가 있을 때만 매장 재고로 표시
       const isMyBatch = custodian.toLowerCase() === address.toLowerCase();
 
       if (isMyBatch) {
