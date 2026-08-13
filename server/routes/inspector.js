@@ -41,7 +41,7 @@ router.get("/pending-batches", async (req, res) => {
 
       result.push({
         batchId: b.batch_id,
-        batchType: b.batch_type,
+        batchType: b.batch_type || (b.batch_id.startsWith("FG-") ? "FINISHED_GOODS" : b.batch_id.startsWith("INT-") ? "INTERMEDIATE" : "RAW_MATERIAL"),
         productName: b.product_name,
         creator: b.creator,
         createdAt: b.created_at,
@@ -82,7 +82,7 @@ router.post("/record-inspection", async (req, res) => {
     const signers = await ethers.getSigners();
     const inspectorSigner = signers.find(s => s.address.toLowerCase() === inspectorAddress.toLowerCase()) || signers[30];
 
-    // 🔒 권한 자동 부여 및 확인 (AccessControl Missing Role 에러 원천 방지)
+    // 🔒 권한 자동 부여 및 확인
     const inspectorRole = await registry.INSPECTOR_ROLE();
     const hasRole = await registry.hasRole(inspectorRole, inspectorSigner.address);
     if (!hasRole) {
@@ -94,7 +94,6 @@ router.post("/record-inspection", async (req, res) => {
 
     console.log(`🔬 [품질 검사 성적서 온체인 서명 등록] 검사기관: ${inspectorSigner.address} | 배치: ${batchId} | 결과: ${isPassed ? "PASSED(합격)" : "FAILED(불합격/격리)"}`);
 
-    // 스마트 컨트랙트 recordInspection 호출 (불합격 시 스마트 컨트랙트가 자동으로 QUARANTINED 상태 지정)
     const tx = await operations.connect(inspectorSigner).recordInspection(
       batchId,
       Boolean(isPassed),
@@ -111,7 +110,6 @@ router.post("/record-inspection", async (req, res) => {
       [batchId, inspectorSigner.address, Boolean(isPassed), certHash, testDetails || "품질 파라미터 검사 실시", inspectTime]
     );
 
-    // 온체인 최종 배치 상태 조회
     const updatedStatusNum = await operations.getBatchStatus(batchId);
     let updatedStatusStr = "NORMAL";
     if (updatedStatusNum === 1n) updatedStatusStr = "QUARANTINED";
@@ -126,7 +124,7 @@ router.post("/record-inspection", async (req, res) => {
       transactionHash: receipt.hash,
       blockNumber: receipt.blockNumber,
       timestamp: inspectTime,
-      updatedBatchStatus: updatedStatusStr,
+      onchainStatus: updatedStatusStr,
       blockchainStatus: "CONFIRMED_ON_CHAIN"
     };
 
@@ -135,7 +133,7 @@ router.post("/record-inspection", async (req, res) => {
       message: isPassed ?
         "품질 검사 합격 성적서가 블록체인 및 DuckDB에 수록되었습니다." :
         "⚠️ 품질 검사 불합격 성적서 수록 완료: 해당 배치가 온체인 상에서 QUARANTINED(격리) 상태로 변경되었습니다.",
-      certificate
+      record: certificate
     });
   } catch (err) {
     console.error("❌ 품질 검사 성적서 수록 에러:", err);
@@ -143,16 +141,44 @@ router.post("/record-inspection", async (req, res) => {
   }
 });
 
-// 3. 특정 배치의 전체 검사 성적서 이력 조회 API (GET /api/inspector/records/:batchId)
+// 3. 검사 성적서 이력 목록 조회 API (GET /api/inspector/records/:batchId)
 router.get("/records/:batchId", async (req, res) => {
   try {
     const { batchId } = req.params;
-    const records = await runQuery(
-      `SELECT * FROM inspections WHERE batch_id = ? ORDER BY timestamp DESC`,
-      [batchId]
-    );
+    let query = `
+      SELECT i.*, b.product_name, b.batch_type
+      FROM inspections i
+      LEFT JOIN batches b ON i.batch_id = b.batch_id
+    `;
+    let params = [];
+    if (batchId !== "all") {
+      query += ` WHERE i.batch_id = ?`;
+      params.push(batchId);
+    }
+    query += ` ORDER BY i.timestamp DESC`;
 
-    res.json({ success: true, batchId, count: records.length, records });
+    const records = await runQuery(query, params);
+
+    // 각 기록의 온체인 상태 매핑
+    const summaryPath = path.join(__dirname, "..", "..", "data", "supply_chain_dataset_summary.json");
+    let recalledSet = new Set();
+    if (fs.existsSync(summaryPath)) {
+      const recalls = await runQuery(`SELECT batch_id FROM recalls`);
+      recalledSet = new Set(recalls.map(r => r.batch_id));
+    }
+
+    const mappedRecords = records.map(r => {
+      let status = "NORMAL";
+      if (recalledSet.has(r.batch_id)) status = "RECALLED";
+      else if (!r.is_passed) status = "QUARANTINED";
+
+      return {
+        ...r,
+        status
+      };
+    });
+
+    res.json({ success: true, batchId, count: mappedRecords.length, records: mappedRecords });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

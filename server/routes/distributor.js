@@ -38,7 +38,7 @@ router.post("/confirm-receipt", async (req, res) => {
     const signers = await ethers.getSigners();
     const distSigner = signers.find(s => s.address.toLowerCase() === distributorAddress.toLowerCase()) || signers[35];
 
-    // 🔒 유통사 권한 자동 부여 및 검증 (AccessControl Missing Role 방지)
+    // 🔒 유통사 권한 자동 확인 및 부여 (AccessControl Missing Role 방지)
     const distRole = await registry.DISTRIBUTOR_ROLE();
     const hasRole = await registry.hasRole(distRole, distSigner.address);
     if (!hasRole) {
@@ -93,7 +93,8 @@ router.get("/inventory/:address", async (req, res) => {
     const myInventory = [];
     for (const b of allBatches) {
       const custodian = await operations.getCurrentCustodian(b.batch_id);
-      const isMyBatch = custodian.toLowerCase() === address.toLowerCase() || b.creator.toLowerCase() === address.toLowerCase();
+      // 온체인 상 실시간 현재 보관자(custodian)가 해당 유통사이거나 completed transfer가 있을 때만 매장 재고로 표시
+      const isMyBatch = custodian.toLowerCase() === address.toLowerCase();
 
       if (isMyBatch) {
         const statusNum = await operations.getBatchStatus(b.batch_id);
@@ -125,18 +126,15 @@ router.get("/recall-monitor", async (req, res) => {
     const summary = JSON.parse(fs.readFileSync(summaryPath, "utf-8"));
     const operations = await ethers.getContractAt("ChainTraceOperations", summary.contracts.operations);
 
-    // 전체 리콜 및 격리 목록 가져오기
     const dbRecalls = await runQuery(`SELECT * FROM recalls ORDER BY timestamp DESC`);
     const dbInspections = await runQuery(`SELECT * FROM inspections WHERE is_passed = false ORDER BY timestamp DESC`);
 
     const alerts = [];
 
-    // 1) 리콜 발령 배치 및 상위 계보 감지
     for (const r of dbRecalls) {
       const bInfo = await runQuery(`SELECT * FROM batches WHERE batch_id = ?`, [r.batch_id]);
       const product = bInfo.length > 0 ? bInfo[0].product_name : r.batch_id;
 
-      // 해당 리콜 배치로 만들어진 하위 완제품들(Child finished goods) 재귀 검색
       const childBatches = await runQuery(`
         WITH RECURSIVE lineage AS (
           SELECT parent_batch_id, child_batch_id FROM genealogy WHERE parent_batch_id = ?
@@ -163,7 +161,6 @@ router.get("/recall-monitor", async (req, res) => {
       });
     }
 
-    // 2) 검사 불합격(QUARANTINED) 배치 감지
     for (const i of dbInspections) {
       const bInfo = await runQuery(`SELECT * FROM batches WHERE batch_id = ?`, [i.batch_id]);
       const product = bInfo.length > 0 ? bInfo[0].product_name : i.batch_id;

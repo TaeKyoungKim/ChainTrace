@@ -1,361 +1,143 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ChainTrace - 검사기관 시험성적서 무역원장 포탈</title>
+  <title>ChainTrace - 검사기관 품질검사성적서 온체인 포탈</title>
   <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-dark: #080c14;
-      --card-bg: #111a2e;
-      --accent-emerald: #10b981;
-      --accent-cyan: #06b6d4;
+      --bg-dark: #070d19;
+      --card-bg: #0f182e;
+      --accent-green: #10b981;
       --accent-red: #ef4444;
-      --accent-orange: #f59e0b;
+      --accent-cyan: #06b6d4;
+      --accent-indigo: #6366f1;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --border-color: #1e293b;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Pretendard', sans-serif;
-    }
-
-    body {
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      padding: 2rem;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; }
+    body { background-color: var(--bg-dark); color: var(--text-main); padding: 2rem; }
 
     .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 1.5rem;
-      border-bottom: 1px solid var(--border-color);
-      margin-bottom: 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); margin-bottom: 2rem;
     }
+    .header h1 { font-size: 1.8rem; font-weight: 700; color: var(--accent-green); display: flex; align-items: center; gap: 0.5rem; }
+    .header .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.3rem; }
 
-    .header h1 {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: var(--accent-emerald);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .header .subtitle {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      margin-top: 0.3rem;
-    }
-
-    .grid-layout {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2rem;
-    }
-
-    @media (max-width: 1024px) {
-      .grid-layout {
-        grid-template-columns: 1fr;
-      }
-    }
+    .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+    @media (max-width: 1024px) { .grid-layout { grid-template-columns: 1fr; } }
 
     .card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 1.5rem;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-      margin-bottom: 2rem;
+      background: var(--card-bg); border: 1px solid var(--border-color);
+      border-radius: 12px; padding: 1.5rem; box-shadow: 0 8px 24px rgba(0,0,0,0.3); margin-bottom: 2rem;
     }
+    .card-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.5rem; color: #fff; }
 
-    .card-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      margin-bottom: 1.2rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: #fff;
-    }
-
-    .form-group {
-      margin-bottom: 1.2rem;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-bottom: 0.4rem;
-    }
-
+    .form-group { margin-bottom: 1.2rem; }
+    .form-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; }
     .form-control {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      background: #040711;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      color: var(--text-main);
-      font-size: 0.95rem;
-      outline: none;
-      transition: border 0.2s;
+      width: 100%; padding: 0.75rem 1rem; background: #040711; border: 1px solid var(--border-color);
+      border-radius: 8px; color: var(--text-main); font-size: 0.95rem; outline: none; transition: border 0.2s;
     }
+    .form-control:focus { border-color: var(--accent-green); }
 
-    .form-control:focus {
-      border-color: var(--accent-emerald);
-    }
-
-    .radio-group {
-      display: flex;
-      gap: 1.5rem;
-      margin-top: 0.4rem;
-    }
-
-    .radio-label {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
+    .radio-group { display: flex; gap: 1.5rem; margin-top: 0.5rem; }
+    .radio-label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; font-weight: 600; cursor: pointer; }
 
     .btn-submit {
-      width: 100%;
-      padding: 0.9rem;
-      background: linear-gradient(135deg, #10b981, #059669);
-      border: none;
-      border-radius: 8px;
-      color: #fff;
-      font-weight: 700;
-      font-size: 1rem;
-      cursor: pointer;
-      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
-      transition: transform 0.1s, box-shadow 0.2s;
+      width: 100%; padding: 0.9rem; background: linear-gradient(135deg, #10b981, #059669);
+      border: none; border-radius: 8px; color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); transition: transform 0.1s, box-shadow 0.2s;
     }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6); }
 
-    .btn-submit:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
-    }
+    .badge-status { padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+    .badge-passed { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); border: 1px solid var(--accent-green); }
+    .badge-failed { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); border: 1px solid var(--accent-red); }
 
-    .alert-banner {
-      padding: 0.8rem 1rem;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-top: 1rem;
-      display: none;
-    }
-
-    .alert-banner.danger {
-      display: block;
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid var(--accent-red);
-      color: var(--accent-red);
-    }
-
-    .cert-card {
-      background: linear-gradient(135deg, #092019, #05130e);
-      border: 1px solid var(--accent-emerald);
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-top: 1.5rem;
-      display: none;
-    }
-
-    .cert-card.active {
-      display: block;
-      animation: fadeIn 0.4s ease-out;
-    }
-
-    .cert-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 0.6rem;
-      font-size: 0.9rem;
-    }
-
-    .cert-row .label {
-      color: var(--text-muted);
-    }
-
-    .cert-row .val {
-      font-weight: 600;
-      text-align: right;
-      word-break: break-all;
-    }
-
-    .badge-status {
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-
-    .badge-passed {
-      background: rgba(16, 185, 129, 0.15);
-      color: var(--accent-emerald);
-      border: 1px solid var(--accent-emerald);
-    }
-
-    .badge-failed {
-      background: rgba(239, 68, 68, 0.15);
-      color: var(--accent-red);
-      border: 1px solid var(--accent-red);
-    }
-
-    .badge-untested {
-      background: rgba(245, 158, 11, 0.15);
-      color: var(--accent-orange);
-      border: 1px solid var(--accent-orange);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-      font-size: 0.85rem;
-    }
-
-    th,
-    td {
-      padding: 0.75rem;
-      text-align: left;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    th {
-      color: var(--text-muted);
-      background: #040711;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.85rem; }
+    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+    th { color: var(--text-muted); background: #040711; }
   </style>
 </head>
-
 <body>
 
   <div class="header">
     <div>
-      <h1>🔬 ChainTrace 검사기관 시험성적서 포탈</h1>
-      <div class="subtitle">공인 품질 검사 성적서 서명 수록 및 검사 불합격 시 온체인 자동 격리(QUARANTINED) 지정</div>
+      <h1>🔬 ChainTrace 검사기관 시험성적서 온체인 포탈</h1>
+      <div class="subtitle">5개 공인 시험검사기관 IPFS 시험성적서 전자서명 및 부적합(FAILED) 시 온체인 자동 격리(`QUARANTINED`) 수록</div>
     </div>
     <div>
       <label style="font-size:0.8rem; color:var(--text-muted);">접속 검사기관 선택:</label>
       <select id="inspectorSelect" class="form-control" style="width:260px; margin-top:0.3rem;">
-        <option value="0x8263Fce86B1b78F95Ab4dae11907d8AF88f841e7">국가식품품질검사원</option>
-        <option value="0x11e8F3eA3C6FcF12EcfF2722d75CEFC539c51a1C">한국의약품시험연구원</option>
-        <option value="0x7D86687F980A56b832e9378952B738b614A99dc6">SGS코리아검사원</option>
-        <option value="0x9eF6c02FB2ECc446146E05F1fF687a788a8BF76d">KTR한국화학융합시험원</option>
-        <option value="0x323b5d4c32345ced77393b3530b1eed0f346429d">KCL한국건설생활환경시험원</option>
+        <!-- 검사기관 목록 자동로드 -->
       </select>
     </div>
   </div>
 
   <div class="grid-layout">
-    <!-- 왼쪽: 검사 성적서 수록 폼 -->
-    <div>
-      <div class="card">
-        <div class="card-title">📝 품질 검사 성적서 온체인 서명 수록</div>
-        <form id="inspectForm" onsubmit="handleFormSubmit(event)">
+    <!-- 왼쪽: 검사 성적서 작성 폼 -->
+    <div class="card">
+      <div class="card-title">📜 품질 검사 성적서 온체인 서명 수록</div>
+      <form id="inspectionForm" onsubmit="handleFormSubmit(event)">
 
-          <div class="form-group">
-            <label>검사 대상 배치 선택 (Target Batch)</label>
-            <select id="targetBatchSelect" class="form-control" onchange="onBatchSelectChange()" required>
-              <option value="">-- 배치를 선택하세요 --</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>검사 결과 판정 (Inspection Result)</label>
-            <div class="radio-group">
-              <label class="radio-label" style="color:var(--accent-emerald);">
-                <input type="radio" name="isPassed" value="true" checked onchange="toggleAlertBanner(false)"> 🟢 PASSED
-                (규격 적합 / 통과)
-              </label>
-              <label class="radio-label" style="color:var(--accent-red);">
-                <input type="radio" name="isPassed" value="false" onchange="toggleAlertBanner(true)"> 🔴 FAILED (부적합 /
-                불합격)
-              </label>
-            </div>
-          </div>
-
-          <div id="dangerBanner" class="alert-banner danger">
-            ⚠️ 경고: 검사 불합격(FAILED) 등록 시 해당 배치는 온체인 상에서 즉시 QUARANTINED(격리) 상태로 전환되며 물류 이관 및 유통이 차단됩니다.
-          </div>
-
-          <div class="form-group" style="margin-top:1.2rem;">
-            <label>시험성적서 IPFS 해시 (Certificate IPFS Hash)</label>
-            <input type="text" id="certHash" class="form-control" value="ipfs://QmInspectCert_20260812_PASS" required>
-          </div>
-
-          <div class="form-group">
-            <label>검사 항목 및 시험 파라미터 메모 (Test Details)</label>
-            <textarea id="testDetails" class="form-control" rows="3"
-              required>잔류농약 320종 불검출, 유효성분 함량 기준 적합 (국가식품규격 제2026-88호)</textarea>
-          </div>
-
-          <button type="submit" class="btn-submit" id="btnSubmit">🖊️ 시험성적서 온체인 서명 및 수록</button>
-        </form>
-
-        <!-- 발행된 전자성적서 카드 -->
-        <div id="certCard" class="cert-card">
-          <div id="certBadge" class="badge-status badge-passed" style="margin-bottom:1rem;">PASSED</div>
-          <h3 style="font-size:1.1rem; color:var(--accent-emerald); margin-bottom:1rem;">📜 온체인 수록 시험성적서</h3>
-          <div class="cert-row"><span class="label">대상 배치 ID:</span><span class="val" id="certBatchId"></span></div>
-          <div class="cert-row"><span class="label">판정 결과:</span><span class="val" id="certResult"></span></div>
-          <div class="cert-row"><span class="label">온체인 최신 상태:</span><span class="val" id="certStatus"
-              style="color:var(--accent-cyan);"></span></div>
-          <div class="cert-row"><span class="label">서명 검사기관:</span><span class="val" id="certInspector"
-              style="font-size:0.75rem;"></span></div>
-          <div class="cert-row"><span class="label">시험성적서 IPFS:</span><span class="val" id="certIpfs"
-              style="font-size:0.75rem;"></span></div>
-          <div class="cert-row"><span class="label">트랜잭션 해시:</span><span class="val" id="certTxHash"
-              style="font-size:0.7rem; color:var(--accent-emerald);"></span></div>
+        <div class="form-group">
+          <label>검사 대상 배치 선택 (Manufactured Goods & Raw Materials Target Batch)</label>
+          <select id="targetBatchSelect" class="form-control" onchange="generateIpfsHash()" required>
+            <option value="">-- 검사 대상을 선택하세요 --</option>
+          </select>
         </div>
-      </div>
+
+        <div class="form-group">
+          <label>검사 결과 판정 (Inspection Result)</label>
+          <div class="radio-group">
+            <label class="radio-label" style="color:var(--accent-green);">
+              <input type="radio" name="isPassed" value="true" checked> 🟢 PASSED (규격 적합 / 통과)
+            </label>
+            <label class="radio-label" style="color:var(--accent-red);">
+              <input type="radio" name="isPassed" value="false"> 🔴 FAILED (부적합 / 불합격)
+            </label>
+          </div>
+        </div>
+
+        <div id="warningNotice" style="padding:0.8rem; background:rgba(239,68,68,0.15); border:1px solid var(--accent-red); color:var(--accent-red); border-radius:8px; font-size:0.85rem; font-weight:600; margin-bottom:1.2rem;">
+          ⚠️ 경고: 검사 불합격(FAILED) 등록 시 해당 배치는 온체인 상에서 즉시 QUARANTINED(격리) 상태로 전환되며 물류 이관 및 유통이 차단됩니다.
+        </div>
+
+        <div class="form-group">
+          <label>시험성적서 IPFS 해시 (Certificate IPFS Hash)</label>
+          <input type="text" id="ipfsHash" class="form-control" readonly required>
+        </div>
+
+        <div class="form-group">
+          <label>검사 항목 및 시험 파라미터 메모 (Test Details)</label>
+          <textarea id="testDetails" class="form-control" rows="3" required>잔류농약 320종 불검출, 유효성분 함량 기준 적합 (국가식품규격 제2026-88호)</textarea>
+        </div>
+
+        <button type="submit" class="btn-submit" id="btnSubmit">🧪 시험성적서 온체인 서명 및 수록</button>
+      </form>
     </div>
 
-    <!-- 오른쪽: 검사 대상 및 성적서 수록 이력 -->
-    <div>
-      <div class="card">
-        <div class="card-title">📦 온체인 수록 성적서 및 배치 현황</div>
-        <table>
-          <thead>
-            <tr>
-              <th>배치 ID</th>
-              <th>제품명</th>
-              <th>최근 검사 결과</th>
-              <th>온체인 상태</th>
-            </tr>
-          </thead>
-          <tbody id="inspectorTableBody">
-            <tr>
-              <td colspan="4" style="color:var(--text-muted); text-align:center;">로딩 중...</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <!-- 오른쪽: 성적서 및 배치 현황 목록 -->
+    <div class="card">
+      <div class="card-title">📦 온체인 수록 성적서 및 배치 현황</div>
+      <table>
+        <thead>
+          <tr>
+            <th>배치 ID</th>
+            <th>제품명</th>
+            <th>최근 검사 결과</th>
+            <th>온체인 상태</th>
+          </tr>
+        </thead>
+        <tbody id="recordsTableBody">
+          <tr><td colspan="4" style="color:var(--text-muted); text-align:center;">로딩 중...</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
@@ -366,80 +148,109 @@
         const data = await res.json();
         if (data.success && data.inspectors.length > 0) {
           const select = document.getElementById('inspectorSelect');
-          select.innerHTML = data.inspectors.map(ins => `
-            <option value="${ins.address}">${ins.company_name} (${ins.address.slice(0, 6)}...${ins.address.slice(-4)})</option>
-          `).join('');
+          select.innerHTML = data.inspectors.map(i => `<option value="${i.address}">${i.company_name} (${i.address.slice(0,6)}...)</option>`).join('');
         }
       } catch (err) {
-        console.warn('검사기관 목록 로딩 실패:', err);
+        console.error('검사기관 목록 로딩 에러:', err);
       }
     }
 
     async function loadPendingBatches() {
-      const res = await fetch('/api/inspector/pending-batches');
-      const data = await res.json();
+      try {
+        const res = await fetch('/api/inspector/pending-batches');
+        const data = await res.json();
+        if (data.success && data.batches.length > 0) {
+          const select = document.getElementById('targetBatchSelect');
 
-      const select = document.getElementById('targetBatchSelect');
-      const tbody = document.getElementById('inspectorTableBody');
+          const manufacturedGoods = [];
+          const rawMaterials = [];
 
-      if (data.success && data.batches.length > 0) {
-        select.innerHTML = '<option value="">-- 배치를 선택하세요 --</option>' +
-          data.batches.map(b => `<option value="${b.batchId}">[${b.batchId}] ${b.productName} (${b.inspectStatus})</option>`).join('');
+          data.batches.forEach(b => {
+            const id = b.batchId || b.batch_id || '';
+            const type = b.batchType || b.batch_type || '';
+            const name = b.productName || b.product_name || id;
 
-        tbody.innerHTML = data.batches.map(b => {
-          let badgeClass = 'badge-untested';
-          if (b.inspectStatus === 'PASSED') badgeClass = 'badge-passed';
-          if (b.inspectStatus === 'FAILED') badgeClass = 'badge-failed';
+            const isMfg = type === 'FINISHED_GOODS' || type === 'MANUFACTURED' || type === 'INTERMEDIATE' ||
+                          id.startsWith('FG-') || id.startsWith('MFG-') || id.startsWith('INT-');
 
-          let statusClass = 'badge-passed';
-          if (b.overallStatus === 'QUARANTINED' || b.overallStatus === 'RECALLED') statusClass = 'badge-failed';
+            const item = { id, name, type };
+            if (isMfg) {
+              manufacturedGoods.push(item);
+            } else {
+              rawMaterials.push(item);
+            }
+          });
 
-          return `
-            <tr>
-              <td style="font-weight:600; color:var(--accent-cyan);">${b.batchId}</td>
-              <td>${b.productName}</td>
-              <td><span class="badge-status ${badgeClass}">${b.inspectStatus}</span></td>
-              <td><span class="badge-status ${statusClass}">${b.overallStatus}</span></td>
-            </tr>
-          `;
-        }).join('');
+          let html = '<option value="">-- 검사 대상을 선택하세요 --</option>';
+
+          if (manufacturedGoods.length > 0) {
+            html += '<optgroup label="🏭 제조 완제품 및 가공재 (Manufactured Products)">' +
+              manufacturedGoods.map(b => `<option value="${b.id}">[${b.id}] ${b.name}</option>`).join('') +
+              '</optgroup>';
+          }
+          if (rawMaterials.length > 0) {
+            html += '<optgroup label="🌿 1차 생농축 원료 (Raw Materials)">' +
+              rawMaterials.map(b => `<option value="${b.id}">[${b.id}] ${b.name}</option>`).join('') +
+              '</optgroup>';
+          }
+
+          select.innerHTML = html;
+          generateIpfsHash();
+        }
+      } catch (err) {
+        console.error('검사 대상 로딩 에러:', err);
+      } finally {
+        loadRecords();
       }
     }
 
-    function onBatchSelectChange() {
-      const bId = document.getElementById('targetBatchSelect').value;
-      if (bId) {
-        document.getElementById('certHash').value = `ipfs://QmInspectCert_${bId}_${Date.now()}`;
-      }
-    }
-
-    function toggleAlertBanner(show) {
-      document.getElementById('dangerBanner').style.display = show ? 'block' : 'none';
-      if (show) {
-        document.getElementById('testDetails').value = '잔류농약 기준치 초과 검출 (카드뮴/파라티온 허용기준 부적합)';
+    function generateIpfsHash() {
+      const batchId = document.getElementById('targetBatchSelect').value;
+      if (batchId) {
+        document.getElementById('ipfsHash').value = `ipfs://QmInspectCert_${batchId}_${Date.now()}`;
       } else {
-        document.getElementById('testDetails').value = '잔류농약 320종 불검출, 유효성분 함량 기준 적합 (국가식품규격 제2026-88호)';
+        document.getElementById('ipfsHash').value = '';
+      }
+    }
+
+    async function loadRecords() {
+      const tbody = document.getElementById('recordsTableBody');
+      try {
+        const res = await fetch('/api/inspector/records/all');
+        const data = await res.json();
+        if (data.success && data.records.length > 0) {
+          tbody.innerHTML = data.records.map(r => `
+            <tr>
+              <td style="font-weight:600; color:var(--accent-cyan);">${r.batch_id}</td>
+              <td>${r.product_name || r.batch_id}</td>
+              <td>${r.is_passed ? '<span class="badge-status badge-passed">PASSED</span>' : '<span class="badge-status badge-failed">FAILED</span>'}</td>
+              <td style="font-weight:600; color:${r.status === 'QUARANTINED' ? 'var(--accent-red)' : 'var(--accent-green)'};">${r.status}</td>
+            </tr>
+          `).join('');
+        } else {
+          tbody.innerHTML = '<tr><td colspan="4" style="color:var(--text-muted); text-align:center;">등록된 검사 성적서가 없습니다.</td></tr>';
+        }
+      } catch (err) {
+        tbody.innerHTML = '<tr><td colspan="4" style="color:var(--text-muted); text-align:center;">성적서 목록 로딩 실패</td></tr>';
       }
     }
 
     async function handleFormSubmit(e) {
       e.preventDefault();
       const batchId = document.getElementById('targetBatchSelect').value;
-      if (!batchId) {
-        alert('검사 대상을 선택하세요!');
-        return;
-      }
+      if (!batchId) return alert('검사 대상 배치를 선택해주세요.');
+
+      const btn = document.getElementById('btnSubmit');
+      btn.innerText = "⏳ 시험성적서 온체인 서명 등록 중...";
+      btn.disabled = true;
 
       const isPassed = document.querySelector('input[name="isPassed"]:checked').value === 'true';
-      const btn = document.getElementById('btnSubmit');
-      btn.innerText = "⏳ 온체인 서명 및 성적서 수록 중...";
-      btn.disabled = true;
 
       const payload = {
         inspectorAddress: document.getElementById('inspectorSelect').value,
         batchId,
         isPassed,
-        certHash: document.getElementById('certHash').value,
+        certHash: document.getElementById('ipfsHash').value,
         testDetails: document.getElementById('testDetails').value
       };
 
@@ -452,29 +263,15 @@
 
         const data = await res.json();
         if (data.success) {
-          const c = data.certificate;
-          document.getElementById('certBatchId').innerText = c.batchId;
-          document.getElementById('certResult').innerText = c.isPassed ? "PASSED (합격)" : "FAILED (불합격)";
-          document.getElementById('certStatus').innerText = c.updatedBatchStatus;
-          document.getElementById('certInspector').innerText = c.inspectorAddress;
-          document.getElementById('certIpfs').innerText = c.certHash;
-          document.getElementById('certTxHash').innerText = c.transactionHash;
-
-          const badge = document.getElementById('certBadge');
-          badge.innerText = c.isPassed ? "PASSED" : "FAILED / QUARANTINED";
-          badge.className = `badge-status ${c.isPassed ? 'badge-failed' : 'badge-failed'}`;
-          if (c.isPassed) badge.className = 'badge-status badge-passed';
-
-          document.getElementById('certCard').classList.add('active');
-
+          alert(`✅ 시험성적서 수록 완료!\n- 배치 ID: ${batchId}\n- 온체인 상태: ${data.record.onchainStatus}`);
           loadPendingBatches();
         } else {
-          alert('수록 실패: ' + data.message);
+          alert('등록 실패: ' + data.message);
         }
       } catch (err) {
         alert('오류 발생: ' + err.message);
       } finally {
-        btn.innerText = "🖊️ 시험성적서 온체인 서명 및 수록";
+        btn.innerText = "🧪 시험성적서 온체인 서명 및 수록";
         btn.disabled = false;
       }
     }
@@ -485,5 +282,4 @@
     };
   </script>
 </body>
-
 </html>

@@ -15,7 +15,9 @@
     "query-localhost": "node scripts/query_onchain_data.js --network localhost",
     "check-accounts": "node scripts/check_accounts.js",
     "start-server": "node server/index.js",
-    "test-phase2": "node scripts/test_phase2.js"
+    "test-phase2": "node scripts/test_phase2.js",
+    "anvil": "anvil --chain-id 31337 --port 8545 -a 60 --balance 100000 -m \"test test test test test test test test test test test junk\"",
+    "setup-anvil": "node scripts/setup_anvil.js"
   },
   "author": "",
   "license": "MIT",
