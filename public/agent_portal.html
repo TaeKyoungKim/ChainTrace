@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChainTrace - LangGraph / Gemini 3.5 Flash 지능형 AI 무역원장 포탈</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    :root {
+      --bg-dark: #070913;
+      --card-bg: #0f1424;
+      --accent-purple: #8b5cf6;
+      --accent-indigo: #6366f1;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-rose: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #1e293b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; }
+    body { background-color: var(--bg-dark); color: var(--text-main); padding: 1.5rem; height: 100vh; display: flex; flex-direction: column; }
+
+    .header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 1rem; border-bottom: 1px solid var(--border-color); margin-bottom: 1rem; flex-shrink: 0;
+    }
+    .header h1 { font-size: 1.6rem; font-weight: 700; color: var(--accent-purple); display: flex; align-items: center; gap: 0.5rem; }
+    .header .subtitle { color: var(--text-muted); font-size: 0.85rem; margin-top: 0.2rem; }
+
+    .nav-links { display: flex; gap: 0.8rem; }
+    .nav-btn {
+      padding: 0.4rem 0.8rem; background: #1e1b4b; border: 1px solid var(--accent-indigo);
+      border-radius: 6px; color: var(--text-main); font-size: 0.8rem; text-decoration: none; transition: background 0.2s;
+    }
+    .nav-btn:hover { background: var(--accent-indigo); }
+
+    .main-container { display: grid; grid-template-columns: 320px 1fr; gap: 1.5rem; flex: 1; min-height: 0; }
+    @media (max-width: 900px) { .main-container { grid-template-columns: 1fr; } }
+
+    /* 왼쪽 사이드바: 추천 질문 및 단축 도구 */
+    .sidebar { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.2rem; display: flex; flex-direction: column; overflow-y: auto; }
+    .section-title { font-size: 0.95rem; font-weight: 600; color: var(--accent-cyan); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.4rem; }
+
+    .suggestion-chip {
+      background: #141a2e; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.8rem;
+      font-size: 0.85rem; color: var(--text-main); margin-bottom: 0.6rem; cursor: pointer; transition: all 0.2s;
+    }
+    .suggestion-chip:hover { border-color: var(--accent-purple); background: #1c2540; transform: translateX(3px); }
+
+    .tool-badge-box { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border-color); }
+    .tool-tag { display: inline-block; padding: 0.2rem 0.5rem; background: rgba(139, 92, 246, 0.15); border: 1px solid var(--accent-purple); border-radius: 4px; font-size: 0.75rem; color: var(--accent-purple); margin: 0.2rem; }
+
+    /* 오른쪽: 메인 AI 대화 채팅창 */
+    .chat-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
+
+    .chat-messages { flex: 1; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.2rem; }
+
+    .message-row { display: flex; gap: 0.8rem; max-width: 85%; }
+    .message-row.user { align-self: flex-end; flex-direction: row-reverse; }
+    .message-row.assistant { align-self: flex-start; }
+
+    .avatar { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; flex-shrink: 0; }
+    .avatar.user { background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff; }
+    .avatar.assistant { background: linear-gradient(135deg, #8b5cf6, #06b6d4); color: #fff; box-shadow: 0 0 12px rgba(139, 92, 246, 0.5); }
+
+    .bubble {
+      padding: 1rem 1.2rem; border-radius: 12px; font-size: 0.92rem; line-height: 1.6; word-break: break-word;
+    }
+    .message-row.user .bubble { background: #312e81; color: #fff; border-bottom-right-radius: 2px; }
+    .message-row.assistant .bubble { background: #131a2e; border: 1px solid var(--border-color); color: var(--text-main); border-bottom-left-radius: 2px; }
+
+    .bubble p { margin-bottom: 0.6rem; }
+    .bubble p:last-child { margin-bottom: 0; }
+    .bubble code { background: #070913; padding: 0.2rem 0.4rem; border-radius: 4px; font-family: monospace; color: var(--accent-cyan); font-size: 0.85rem; }
+    .bubble pre { background: #070913; padding: 0.8rem; border-radius: 8px; overflow-x: auto; margin: 0.6rem 0; border: 1px solid var(--border-color); }
+    .bubble pre code { background: none; padding: 0; }
+
+    /* 입력 하단바 */
+    .input-box { padding: 1rem 1.5rem; background: #080b16; border-top: 1px solid var(--border-color); display: flex; gap: 0.8rem; }
+    .chat-input {
+      flex: 1; padding: 0.8rem 1.2rem; background: #0f1424; border: 1px solid var(--border-color);
+      border-radius: 8px; color: var(--text-main); font-size: 0.95rem; outline: none; transition: border 0.2s;
+    }
+    .chat-input:focus { border-color: var(--accent-purple); }
+
+    .btn-send {
+      padding: 0.8rem 1.5rem; background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      border: none; border-radius: 8px; color: #fff; font-weight: 700; font-size: 0.95rem; cursor: pointer;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); transition: transform 0.1s, box-shadow 0.2s;
+    }
+    .btn-send:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6); }
+
+    .loading-dots span { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-purple); margin: 0 2px; animation: bounce 1.4s infinite ease-in-out both; }
+    .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+    .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div>
+      <h1>🤖 ChainTrace LangGraph / Gemini 3.5 Flash AI 무역원장 포탈</h1>
+      <div class="subtitle">DuckDB Direct SQL 계보 재귀 추적 + 이더리움 스마트 컨트랙트 실시간 준수성 자동 감사 에이전트</div>
+    </div>
+    <div class="nav-links">
+      <a href="/supplier_portal.html" class="nav-btn">🌿 원료사</a>
+      <a href="/manufacturer_portal.html" class="nav-btn">🏭 제조사</a>
+      <a href="/inspector_portal.html" class="nav-btn">🔬 검사기관</a>
+      <a href="/logistics_portal.html" class="nav-btn">🚚 물류사</a>
+      <a href="/distributor_portal.html" class="nav-btn">🏬 유통사</a>
+    </div>
+  </div>
+
+  <div class="main-container">
+    <!-- 왼쪽 사이드바: AI 추천 질문 -->
+    <div class="sidebar">
+      <div class="section-title">💡 추천 질문 및 시나리오</div>
+      <div id="suggestionsList">
+        <div class="suggestion-chip" onclick="sendSuggestedQuery(this.innerText)">
+          🔍 RAW-SUP02-D03 오염 원료의 상위 계보 및 하위 영향 완제품 이력을 정밀 추적해줘.
+        </div>
+        <div class="suggestion-chip" onclick="sendSuggestedQuery(this.innerText)">
+          📜 FG-PACK01-D14 제품의 실시간 온체인 보관자(Custodian)와 검사 성적서를 알려줘.
+        </div>
+        <div class="suggestion-chip" onclick="sendSuggestedQuery(this.innerText)">
+          🌡️ 콜드체인 보관온도 및 국가 식품위생법 규정 준수성 감사를 실행해줘.
+        </div>
+        <div class="suggestion-chip" onclick="sendSuggestedQuery(this.innerText)">
+          📜 이더리움 스마트 컨트랙트 AccessControl 권한 체계와 IPFS 수록 원리를 설명해줘.
+        </div>
+      </div>
+
+      <div class="tool-badge-box">
+        <div class="section-title" style="font-size:0.85rem;">🛠️ 활성화된 LangGraph 에이전트 도구</div>
+        <span class="tool-tag">🦆 searchBatchHistory (DuckDB SQL)</span>
+        <span class="tool-tag">📜 getCurrentStatus (On-chain)</span>
+        <span class="tool-tag">⚖️ auditComplianceRules (규정 감사)</span>
+        <span class="tool-tag">📄 searchDocCode (기술 스펙)</span>
+      </div>
+    </div>
+
+    <!-- 오른쪽: 메인 AI 대화 창 -->
+    <div class="chat-container">
+      <div class="chat-messages" id="chatMessages">
+        <!-- 초기 AI 환영 메시지 -->
+        <div class="message-row assistant">
+          <div class="avatar assistant">🤖</div>
+          <div class="bubble">
+            <p><strong>안녕하세요! ChainTrace 지능형 AI 무역원장 수석 에이전트입니다.</strong></p>
+            <p>백터 임베딩 없이 <strong>DuckDB Direct SQL Recursive CTE</strong> 및 <strong>이더리움 스마트 컨트랙트 실시간 검증</strong>을 통해 무역원장 위변조 확인, 계보 추적, 규정 준수성 심사를 지원합니다.</p>
+            <p>궁금하신 배치 ID(예: <code>RAW-SUP02-D03</code>, <code>FG-PACK01-D14</code>)나 공급망 이상 상태를 자유롭게 질문해 주세요!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 입력창 -->
+      <form class="input-box" onsubmit="handleSend(event)">
+        <input type="text" id="userInput" class="chat-input" placeholder="AI 에이전트에게 공급망 계보 추적 및 온체인 무역원장을 문의하세요..." autocomplete="off">
+        <button type="submit" class="btn-send" id="btnSend">🚀 질의 전송</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const chatHistory = [];
+
+    function appendMessage(role, text) {
+      const chatMessages = document.getElementById('chatMessages');
+      const row = document.createElement('div');
+      row.className = `message-row ${role}`;
+
+      const avatar = document.createElement('div');
+      avatar.className = `avatar ${role}`;
+      avatar.innerText = role === 'user' ? '👤' : '🤖';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      
+      if (role === 'assistant') {
+        bubble.innerHTML = marked.parse(text);
+      } else {
+        bubble.innerText = text;
+      }
+
+      row.appendChild(avatar);
+      row.appendChild(bubble);
+      chatMessages.appendChild(row);
+
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function appendLoadingBubble() {
+      const chatMessages = document.getElementById('chatMessages');
+      const row = document.createElement('div');
+      row.className = 'message-row assistant';
+      row.id = 'loadingBubble';
+
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar assistant';
+      avatar.innerText = '🤖';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> <span style="font-size:0.85rem; color:var(--text-muted); margin-left:0.5rem;">DuckDB CTE 계보 추적 및 온체인 무역원장 검증 중...</span>';
+
+      row.appendChild(avatar);
+      row.appendChild(bubble);
+      chatMessages.appendChild(row);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function removeLoadingBubble() {
+      const loading = document.getElementById('loadingBubble');
+      if (loading) loading.remove();
+    }
+
+    async function handleSend(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('userInput');
+      const message = input.value.trim();
+      if (!message) return;
+
+      input.value = '';
+      appendMessage('user', message);
+
+      const btn = document.getElementById('btnSend');
+      btn.disabled = true;
+      appendLoadingBubble();
+
+      try {
+        const res = await fetch('/api/agent/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message,
+            history: chatHistory
+          })
+        });
+
+        const data = await res.json();
+        removeLoadingBubble();
+
+        if (data.success) {
+          appendMessage('assistant', data.reply);
+          chatHistory.push({ role: 'user', content: message });
+          chatHistory.push({ role: 'assistant', content: data.reply });
+        } else {
+          appendMessage('assistant', '❌ 에러 발생: ' + data.message);
+        }
+      } catch (err) {
+        removeLoadingBubble();
+        appendMessage('assistant', '❌ 통신 에러: ' + err.message);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function sendSuggestedQuery(text) {
+      document.getElementById('userInput').value = text.replace(/^[🔍📜🌡️]\s*/, '');
+      handleSend();
+    }
+  </script>
+</body>
+</html>
